@@ -27,7 +27,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -107,19 +107,26 @@
     <None Include="res\mfc_OpenGL_OpenCL.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\OpenGLLib\include\common\objloader.hpp" />
     <ClInclude Include="cusLib.h" />
+    <ClInclude Include="Log.h" />
     <ClInclude Include="mfc_OpenGL_OpenCL.h" />
     <ClInclude Include="mfc_OpenGL_OpenCLDlg.h" />
     <ClInclude Include="PrallalCompute.h" />
     <ClInclude Include="Render.h" />
+    <ClInclude Include="RenderDlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\OpenGLLib\include\common\objloader.cpp" />
+    <ClCompile Include="cusLib.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="mfc_OpenGL_OpenCL.cpp" />
     <ClCompile Include="mfc_OpenGL_OpenCLDlg.cpp" />
     <ClCompile Include="PrallalCompute.cpp" />
     <ClCompile Include="Render.cpp" />
+    <ClCompile Include="RenderDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

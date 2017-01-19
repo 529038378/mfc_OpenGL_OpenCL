@@ -2,10 +2,13 @@
 // mfc_OpenGL_OpenCLDlg.cpp : 实现文件
 //
 
+#pragma once
+
 #include "stdafx.h"
 #include "mfc_OpenGL_OpenCL.h"
 #include "mfc_OpenGL_OpenCLDlg.h"
 #include "afxdialogex.h"
+#include "Log.h"
 #include <sstream>
 #include <algorithm>
 
@@ -17,7 +20,12 @@
 
 
 
+
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
+
+Cmfc_OpenGL_OpenCLDlg* Cmfc_OpenGL_OpenCLDlg::m_instance = NULL;
+
+
 
 class CAboutDlg : public CDialogEx
 {
@@ -68,12 +76,31 @@ Cmfc_OpenGL_OpenCLDlg::~Cmfc_OpenGL_OpenCLDlg()
 		m_Render = NULL;
 	}
 
+
 	
 }
 void Cmfc_OpenGL_OpenCLDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_HARDWAREINFO_Tree, m_hardwareInfoTreeCtl);
+	DDX_Control(pDX, IDC_LOADMODEL_BUTTON, m_LoadModelBtn);
+	DDX_Control(pDX, IDC_MODELNAME_EDIT, m_ModelNameEdt);
+	DDX_Control(pDX, IDC_PLATFORMS_COMBO, m_PlatformComBox);
+	DDX_Control(pDX, IDC_DEVICES_COMBO, m_DeviceComBox);
+	DDX_Control(pDX, IDC_RUNTIMESTATUS_EDIT, m_StatusEdt);
+	//  DDX_Control(pDX, IDC_COMBO1, m_DimChoose);
+	DDX_Control(pDX, IDC_DIMCHOOSE_COMBO, m_DimChooseComBox);
+	DDX_Control(pDX, IDC_DIMX_EDIT, m_DimXEdt);
+	DDX_Control(pDX, IDC_DIMY_EDIT, m_DimYEdt);
+	DDX_Control(pDX, IDC_DIMZ_EDIT, m_DimZEdt);
+	DDX_Control(pDX, IDC_REFLECTCOUNT_EDIT, m_ReflectCount);
+	DDX_Control(pDX, IDC_VIEWX_EDIT, m_ViewXEdt);
+	//  DDX_Control(pDX, IDC_VIEWY_EDIT, m_ViewY);
+	DDX_Control(pDX, IDC_VIEWY_EDIT, m_ViewYEdt);
+	DDX_Control(pDX, IDC_VIEWZ_EDIT, m_ViewZEdt);
+	DDX_Control(pDX, IDC_LIGHTX_EDIT, m_LightXEdt);
+	DDX_Control(pDX, IDC_LIGHTY_EDIT, m_LightYEdt);
+	DDX_Control(pDX, IDC_LIGHTZ_EDIT, m_LightZEdt);
 }
 
 BEGIN_MESSAGE_MAP(Cmfc_OpenGL_OpenCLDlg, CDialogEx)
@@ -81,6 +108,18 @@ BEGIN_MESSAGE_MAP(Cmfc_OpenGL_OpenCLDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_CREATE()
+	ON_BN_CLICKED(IDC_LOADMODEL_BUTTON, &Cmfc_OpenGL_OpenCLDlg::OnBnClickedLoadmodelButton)
+	ON_BN_CLICKED(IDC_GETMODELINFO_BUTTON, &Cmfc_OpenGL_OpenCLDlg::OnBnClickedGetModeLinfoButton)
+	ON_BN_CLICKED(IDC_INITIALCONTEXT_BUTTON, &Cmfc_OpenGL_OpenCLDlg::OnBnClickedInitialContextButton)
+	ON_CBN_SELCHANGE(IDC_PLATFORMS_COMBO, &Cmfc_OpenGL_OpenCLDlg::OnCbnSelchangePlatformsCombo)
+	ON_CBN_SELCHANGE(IDC_DEVICES_COMBO, &Cmfc_OpenGL_OpenCLDlg::OnCbnSelchangeDevicesCombo)
+	ON_CBN_SELCHANGE(IDC_DIMCHOOSE_COMBO, &Cmfc_OpenGL_OpenCLDlg::OnCbnSelchangeDimChooseCombo)
+	ON_BN_CLICKED(IDC_CONFIGCONFIRM_BUTTON, &Cmfc_OpenGL_OpenCLDlg::OnBnClickedConfigConfirmButton)
+	ON_BN_CLICKED(IDC_COMMONSPLIT_RADIO, &Cmfc_OpenGL_OpenCLDlg::OnBnClickedCommonSplitRadio)
+	ON_BN_CLICKED(IDC_SAASAHSPLIT_RADIO, &Cmfc_OpenGL_OpenCLDlg::OnBnClickedSAASAHSplitRadio)
+	ON_BN_CLICKED(IDC_PSOSAHSPLIT_RADIO, &Cmfc_OpenGL_OpenCLDlg::OnBnClickedPSOSAHSplitRadio)
+	ON_BN_CLICKED(IDC_OFFLINERENDERING_BUTTON, &Cmfc_OpenGL_OpenCLDlg::OnBnClickedOffLineRenderingButton)
+	ON_BN_CLICKED(IDC_REALTIMERENDERING_BUTTON, &Cmfc_OpenGL_OpenCLDlg::OnBnClickedRealtimeRenderingButton)
 END_MESSAGE_MAP()
 
 
@@ -117,19 +156,27 @@ BOOL Cmfc_OpenGL_OpenCLDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-	CRect rect(500, 0, 1000, 300);
+	//CRender类对象初始化
+	//CRect dlgRect;
+	//GetClientRect(&dlgRect);
+	//CRect rect(15, dlgRect.Height()/2 - 5, dlgRect.Width() - 15, dlgRect.Height()-5);
+	/*CRect rect(0, 100, 200, 300);
 	m_Render = new CRender;
-	m_Render->Create(NULL, NULL, WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE, rect, this, 0);
+	m_Render->Create(NULL, NULL, WS_CHILDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE, rect, this, 0);*/
+	m_RenderDlg = new CRenderDlg;
+	m_RenderDlg->GetInstance()->DoModal();
+	m_Render = m_RenderDlg->GetInstance()->GetRenderObj();
+
+	//硬件信息显示CTreeCtrl和硬件选择ComboBox相关
+	ASSERT(m_Render);
+	m_HardwareInfo = m_Render->GetCompObj()->GetHardwareInfo();
+	ASSERT(m_HardwareInfo);
 	
-	//硬件信息显示
-	m_hardwareInfo = m_Render->GetCompObj()->GetHardwareInfo();
-	ASSERT(m_hardwareInfo);
-	
-	m_hardwarePlatformNode.resize(m_hardwareInfo->platformIDs.size());
+	m_hardwarePlatformNode.resize(m_HardwareInfo->platformIDs.size());
 	m_root = m_hardwareInfoTreeCtl.InsertItem(_T("本机可供GPGPU硬件信息"), 0, 0);
 
 	static int deviceInfoIndex = 0;
-	for (auto platformItr = m_hardwareInfo->platformInfo.begin(); platformItr != m_hardwareInfo->platformInfo.end(); platformItr++)
+	for (auto platformItr = m_HardwareInfo->platformInfo.begin(); platformItr != m_HardwareInfo->platformInfo.end(); platformItr++)
 	{
 		std::string platformInfo("");
 		//platformInfo = platformItr->name.substr(0, platformItr->name.length()-1) + " ( Vendor Name:" + platformItr->venderName.substr(0, platformItr->venderName.length()-1) + " device num: " + TtoStr(platformItr->deviceNum) +")";
@@ -137,12 +184,15 @@ BOOL Cmfc_OpenGL_OpenCLDlg::OnInitDialog()
 
 		std::wstringstream wsPlatformInfo;
 		wsPlatformInfo<<platformInfo.c_str();
-		int platformIndex = platformItr - m_hardwareInfo->platformInfo.begin();
+		int platformIndex = platformItr - m_HardwareInfo->platformInfo.begin();
 		m_hardwarePlatformNode[platformIndex] = m_hardwareInfoTreeCtl.InsertItem(wsPlatformInfo.str().c_str(), m_root, TVI_LAST);
 		m_hardwareInfoTreeCtl.SetItemData(m_hardwarePlatformNode[platformIndex], platformIndex);
 
+		//平台选择ComboBox相关
+		m_PlatformComBox.InsertString(platformIndex, StrToCStr(platformItr->name));
+
 		m_harewareDeviceNode.resize(m_harewareDeviceNode.size()+platformItr->deviceInfo.size());
-		m_hardwareInfo->deviceInfo.resize(m_hardwareInfo->deviceInfo.size() + platformItr->deviceInfo.size());
+		m_HardwareInfo->deviceInfo.resize(m_HardwareInfo->deviceInfo.size() + platformItr->deviceInfo.size());
 		for (auto deviceItr = platformItr->deviceInfo.begin(); deviceItr != platformItr->deviceInfo.end(); deviceItr++, deviceInfoIndex++)
 		{
 			int deviceIndex = deviceItr - platformItr->deviceInfo.begin();
@@ -151,7 +201,7 @@ BOOL Cmfc_OpenGL_OpenCLDlg::OnInitDialog()
 			HTREEITEM LeafNodeItem = m_hardwareInfoTreeCtl.InsertItem(wsDeviceInfo.str().c_str(), m_hardwarePlatformNode[platformIndex], TVI_LAST);
 			m_harewareDeviceNode[deviceInfoIndex]=LeafNodeItem;
 			m_hardwareInfoTreeCtl.SetItemData(LeafNodeItem, deviceIndex);
-			m_hardwareInfo->deviceInfo[deviceInfoIndex] = *deviceItr;
+			m_HardwareInfo->deviceInfo[deviceInfoIndex] = *deviceItr;
 		}
 
 	}
@@ -160,6 +210,15 @@ BOOL Cmfc_OpenGL_OpenCLDlg::OnInitDialog()
 	m_hardwareInfoTreeCtl.GetClientRect(&treeClientRect);
 	m_toolTip.AddTool(GetDlgItem(IDC_HARDWAREINFO_Tree), _T("本机硬件信息"), &treeClientRect, IDC_HARDWAREINFO_Tree);
 
+	//参数设置区相关
+	m_SelDimNum = 0;
+	m_DimXEdt.EnableWindow(FALSE);
+	m_DimYEdt.EnableWindow(FALSE);
+	m_DimZEdt.EnableWindow(FALSE);
+
+	((CButton*)GetDlgItem(IDC_COMMONSPLIT_RADIO))->SetCheck(TRUE);
+	m_SelRadio = SAHSPLIT_COMM;
+	
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -247,7 +306,7 @@ BOOL Cmfc_OpenGL_OpenCLDlg::PreTranslateMessage(MSG* pMsg)
 				{
 					std::string tipInfo("");
 					int platformIndex = itrPlatform - m_hardwarePlatformNode.begin();
-					tipInfo = "VenderName: " + m_hardwareInfo->platformInfo[platformIndex].venderName.substr(0, m_hardwareInfo->platformInfo[platformIndex].venderName.length()-1) + ",	 Device Num: " + TtoStr(m_hardwareInfo->platformInfo[platformIndex].deviceNum) + ".";
+					tipInfo = "VenderName: " + m_HardwareInfo->platformInfo[platformIndex].venderName.substr(0, m_HardwareInfo->platformInfo[platformIndex].venderName.length()-1) + ",	 Device Num: " + TToStr(m_HardwareInfo->platformInfo[platformIndex].deviceNum) + ".";
 
 					std::wstringstream wTipInfo;
 					wTipInfo<<tipInfo.c_str();
@@ -260,20 +319,20 @@ BOOL Cmfc_OpenGL_OpenCLDlg::PreTranslateMessage(MSG* pMsg)
 					std::string tipInfo("");
 					int deviceIndex = itrDevice - m_harewareDeviceNode.begin();
 					std::string workItemSize("");
-					for (auto itr = m_hardwareInfo->deviceInfo[deviceIndex].maxWorkItemSize.begin(); itr != m_hardwareInfo->deviceInfo[deviceIndex].maxWorkItemSize.end(); itr++)
+					for (auto itr = m_HardwareInfo->deviceInfo[deviceIndex].maxWorkItemSize.begin(); itr != m_HardwareInfo->deviceInfo[deviceIndex].maxWorkItemSize.end(); itr++)
 					{
-						int tmp = m_hardwareInfo->deviceInfo[deviceIndex].maxWorkItemSize[0];
-						tmp = m_hardwareInfo->deviceInfo[deviceIndex].maxWorkItemSize[1];
-						tmp = m_hardwareInfo->deviceInfo[deviceIndex].maxWorkItemSize[2];
-						workItemSize += TtoStr(*itr) + ",";
+						int tmp = m_HardwareInfo->deviceInfo[deviceIndex].maxWorkItemSize[0];
+						tmp = m_HardwareInfo->deviceInfo[deviceIndex].maxWorkItemSize[1];
+						tmp = m_HardwareInfo->deviceInfo[deviceIndex].maxWorkItemSize[2];
+						workItemSize += TToStr(*itr) + ",";
 					}
 					workItemSize = "(" + workItemSize.substr(0, workItemSize.length()-1) +")";
-					tipInfo = "Type: " + TtoStr(m_hardwareInfo->deviceInfo[deviceIndex].type) 
-						+",	Max Clock Freq: " + TtoStr(m_hardwareInfo->deviceInfo[deviceIndex].maxClockFreq) 
-						+ ",	BitWidth: " + TtoStr(m_hardwareInfo->deviceInfo[deviceIndex].bitWidth) 
-						+ ",	Global Mem Size: " + TtoStr(m_hardwareInfo->deviceInfo[deviceIndex].globalMemSize)
-						+ ",	Local Mem Size: " + TtoStr(m_hardwareInfo->deviceInfo[deviceIndex].localMemSize)
-						+ ",	Max Compute Unit: " + TtoStr(m_hardwareInfo->deviceInfo[deviceIndex].maxComputeUnits)
+					tipInfo = "Type: " + TToStr(m_HardwareInfo->deviceInfo[deviceIndex].type) 
+						+",	Max Clock Freq: " + TToStr(m_HardwareInfo->deviceInfo[deviceIndex].maxClockFreq) 
+						+ ",	BitWidth: " + TToStr(m_HardwareInfo->deviceInfo[deviceIndex].bitWidth) 
+						+ ",	Global Mem Size: " + TToStr(m_HardwareInfo->deviceInfo[deviceIndex].globalMemSize)
+						+ ",	Local Mem Size: " + TToStr(m_HardwareInfo->deviceInfo[deviceIndex].localMemSize)
+						+ ",	Max Compute Unit: " + TToStr(m_HardwareInfo->deviceInfo[deviceIndex].maxComputeUnits)
 						+ ",	Max WorkItemSize: " + workItemSize + ".";
 
 					std::wstringstream wTipInfo;
@@ -285,4 +344,435 @@ BOOL Cmfc_OpenGL_OpenCLDlg::PreTranslateMessage(MSG* pMsg)
 		}
 	}
 	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+void Cmfc_OpenGL_OpenCLDlg::OnBnClickedLoadmodelButton()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	// 设置过滤器   
+	TCHAR szFilter[] = _T("文本文件(*.obj)|*.obj|所有文件(*.*)|*.*||");   
+	// 构造打开文件对话框   
+	CFileDialog fileDlg(TRUE, _T("obj"), NULL, 0, szFilter, this);   
+	CString strFilePath;   
+
+	// 显示打开文件对话框   
+	if (IDOK == fileDlg.DoModal())   
+	{   
+		// 如果点击了文件对话框上的“打开”按钮，则将选择的文件路径显示到编辑框里   
+		strFilePath = fileDlg.GetPathName();   
+		m_ModelName = CStrToStr(strFilePath);
+		SetDlgItemText(IDC_MODELNAME_EDIT, strFilePath.Mid(strFilePath.ReverseFind(_T('\\'))+1));   
+		CString str = _T("读取模型文件：") + strFilePath.Mid(strFilePath.ReverseFind(_T('\\'))+1);
+		systemLog->PrintStatus(str.GetBuffer());
+	}   
+	
+}
+
+
+void Cmfc_OpenGL_OpenCLDlg::OnBnClickedGetModeLinfoButton()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	if (m_Render->LoadObjInfo(m_ModelName))
+	{
+		MessageBox(_T("模型数据读取完毕！"));
+		systemLog->PrintStatus(_T("模型数据读取完成！\r\n"));
+	}
+	else
+	{
+		MessageBox(_T("模型数据读取失败！"));
+		systemLog->PrintStatus(_T("模型数据读取失败！"));
+	}
+}
+
+
+void Cmfc_OpenGL_OpenCLDlg::OnBnClickedInitialContextButton()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	m_Render->InitContext();
+}
+
+
+void Cmfc_OpenGL_OpenCLDlg::OnCbnSelchangePlatformsCombo()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	m_SelPlatformIndex = m_PlatformComBox.GetCurSel();
+	m_Render->SetSelHardware(m_SelPlatformIndex);
+	m_DeviceComBox.ResetContent();
+	auto itr = m_Render->GetCompObj()->GetHardwareInfo()->platformInfo[m_SelPlatformIndex];
+	for ( auto inItr = itr.deviceInfo.begin(); inItr != itr.deviceInfo.end(); inItr++)
+	{
+		m_DeviceComBox.InsertString(inItr-itr.deviceInfo.begin(),StrToCStr(inItr->name));
+	}
+
+	CString str = _T("Selected Platform: ") + StrToCStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].name) 
+		+	_T("\r\n	--VenderName:	") + StrToCStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].venderName)
+		+	_T("\r\n	--DeviceNum:	") + StrToCStr(TToStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceNum))
+		+	_T("\r\n");
+	systemLog->PrintStatus(str.GetBuffer());
+}
+
+
+void Cmfc_OpenGL_OpenCLDlg::OnCbnSelchangeDevicesCombo()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	m_SelDeviceIndex = m_DeviceComBox.GetCurSel();
+	m_Render->SetSelHardware(-1, m_SelDeviceIndex);
+
+	//信息打印相关
+	/*std::string str = "Selected Device: "+ m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].name;	
+	systemLog->PrintStatus(StrToCStr(str).GetBuffer());*/
+	CString deviceType(_T(""));
+	switch (m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].type)
+	{
+	case CL_DEVICE_TYPE_CPU:
+		deviceType = _T("CPU");
+		break;
+	case CL_DEVICE_TYPE_GPU:
+		deviceType = _T("GPU");
+		break;
+	default:
+		break;
+	}
+	std::string workItemSize("");
+	workItemSize += "(";
+	for (auto itr = m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize.begin(); itr != m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize.end(); itr++)
+	{
+		workItemSize += TToStr(*itr) + ",";
+	}
+	workItemSize = workItemSize.substr(0, workItemSize.length()-1);
+	workItemSize += ")";
+	CString str = _T("Selected Device:		") + StrToCStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].name)
+		+	_T("\r\n	--DeviceType:		") + deviceType
+		+	_T("\r\n	--ClockFreq(MHz):		") + StrToCStr(TToStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxClockFreq))
+		+	_T("\r\n	--BitWidth:		")	+ StrToCStr(TToStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].bitWidth))
+		+	_T("\r\n	--GlobalMemSize(MB):	") + StrToCStr(TToStr((float)m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].globalMemSize/(1024*1024)))
+		+	_T("\r\n	--LocalMemSize(KB):	") + StrToCStr(TToStr((float)m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].localMemSize/1024))
+		+	_T("\r\n	--MaxComputeUnitNum:	") + StrToCStr(TToStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxComputeUnits))
+		+	_T("\r\n	--MaxWorkItemSize:	") + StrToCStr(workItemSize)
+		+	_T("\r\n	--OpenCLVersion:		") + StrToCStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].version) 
+		+	_T("\r\n");
+		systemLog->PrintStatus(str.GetBuffer());
+
+		//参数设置相关
+		for (auto i = 0; i<m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxDimension; i++)
+		{
+			m_DimChooseComBox.AddString(StrToCStr(TToStr(i+1)));
+		}
+
+		
+}
+
+CEdit* Cmfc_OpenGL_OpenCLDlg::GetStatusEdt()
+{
+	return &m_StatusEdt;
+}
+
+
+
+void Cmfc_OpenGL_OpenCLDlg::OnCbnSelchangeDimChooseCombo()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	int index = m_DimChooseComBox.GetCurSel();
+
+	switch (index+1)
+	{
+	case 1:
+		m_DimXEdt.EnableWindow(TRUE);
+		m_DimYEdt.EnableWindow(FALSE);
+		m_DimZEdt.EnableWindow(FALSE);
+		systemLog->PrintStatus(_T("设置NDRange维度为1！"));
+		m_SelDimNum = 1;
+		break;
+	case 2:
+		m_DimXEdt.EnableWindow(TRUE);
+		m_DimYEdt.EnableWindow(TRUE);
+		m_DimZEdt.EnableWindow(FALSE);
+		systemLog->PrintStatus(_T("设置NDRange维度为2！"));
+		m_SelDimNum = 2;
+		break;
+	case 3:
+		m_DimXEdt.EnableWindow(TRUE);
+		m_DimYEdt.EnableWindow(TRUE);
+		m_DimZEdt.EnableWindow(TRUE);
+		systemLog->PrintStatus(_T("设置NDRange维度为3！"));
+		m_SelDimNum = 3;
+		break;
+	default:
+		break;
+	}
+}
+
+CString Cmfc_OpenGL_OpenCLDlg::GetEdtContent(CEdit* edit, wchar_t* info)
+{
+	wchar_t* res = new wchar_t[edit->LineLength()];
+	int len = edit->GetLine(0, res, edit->LineLength());
+	if (len<=0)
+	{
+		CString csInfo(info);
+		csInfo = _T("Error:") + CString(info);
+		MessageBox(csInfo.GetBuffer());
+		csInfo = _T("Error:	") + CString(info);
+		systemLog->PrintStatus(csInfo.GetBuffer());
+		return CString(_T(""));
+	}
+	else
+	return CString(res, len);
+}
+
+void Cmfc_OpenGL_OpenCLDlg::OnBnClickedConfigConfirmButton()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	//NDRange参数查错
+	std::vector<int> workGroup;
+	workGroup.resize(m_SelDimNum);
+	switch (m_SelDimNum)
+	{
+	case 1:
+		{
+			CString dimX;
+			wchar_t* dim = new wchar_t[m_DimXEdt.LineLength()];
+			m_DimXEdt.GetLine(0, dim, m_DimXEdt.LineLength());
+			dimX = CString(dim, m_DimXEdt.LineLength());
+			if (dimX.GetLength()<=0)
+			{
+				MessageBox(_T("Error:X维度设置出错！"));
+				systemLog->PrintStatus(_T("Error:	X维度设置出错！"));
+				return;
+			}
+			delete[] dim;
+			float fDimX = StrToFloat(CStrToStr(dimX));
+			if (fDimX>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimX<=0)
+			{
+				MessageBox(_T("Error:X维度设定值超出设备阈值！"));
+				systemLog->PrintStatus(_T("Error:	X维度设定值超出设备阈值！"));
+				return;
+			}
+			CString info = _T("设置X维度的工作组为--") + dimX;
+			systemLog->PrintStatus(info.GetBuffer());
+			workGroup[0] = fDimX;
+
+		}
+		break;
+	case 2:
+		{
+			CString dimX;
+			wchar_t* dim = new wchar_t[m_DimXEdt.LineLength()];
+			m_DimXEdt.GetLine(0, dim, m_DimXEdt.LineLength());
+			dimX = CString(dim, m_DimXEdt.LineLength());
+			if (dimX.GetLength()<=0)
+			{
+				MessageBox(_T("Error:X维度设置出错！"));
+				systemLog->PrintStatus(_T("Error:	X维度设置出错！"));
+				return;
+			}
+			delete[] dim;
+			float fDimX = StrToFloat(CStrToStr(dimX));
+			if (fDimX>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimX<=0)
+			{
+				MessageBox(_T("Error:X维度设定值超出设备阈值！"));
+				systemLog->PrintStatus(_T("Error:	X维度设定值超出设备阈值！"));
+				return;
+			}
+			CString info = _T("设置X维度的工作组为--") + dimX;
+			systemLog->PrintStatus(info.GetBuffer());
+			workGroup[0] = fDimX;
+
+
+		}
+		{
+			CString dimY;
+			wchar_t* dim = new wchar_t[m_DimYEdt.LineLength()];
+			m_DimYEdt.GetLine(0, dim, m_DimYEdt.LineLength());
+			dimY = CString(dim, m_DimYEdt.LineLength());
+			if (dimY.GetLength()<=0)
+			{
+				MessageBox(_T("Error:Y维度设置出错！"));
+				systemLog->PrintStatus(_T("Error:	Y维度设置出错！"));
+				return;
+			}
+			delete[] dim;
+			float fDimY = StrToFloat(CStrToStr(dimY));
+			if (fDimY>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimY<=0)
+			{
+				MessageBox(_T("Error:Y维度设定值超出设备阈值！"));
+				systemLog->PrintStatus(_T("Error:	Y维度设定值超出设备阈值！"));
+				return;
+			}
+			CString info = _T("设置Y维度的工作组为--") + dimY;
+			systemLog->PrintStatus(info.GetBuffer());
+			workGroup[1] = fDimY;
+
+		}
+		break;
+	case 3:
+		{
+			CString dimX;
+			wchar_t* dim = new wchar_t[m_DimXEdt.LineLength()];
+			m_DimXEdt.GetLine(0, dim, m_DimXEdt.LineLength());
+			dimX = CString(dim, m_DimXEdt.LineLength());
+			if (dimX.GetLength()<=0)
+			{
+				MessageBox(_T("Error:X维度设置出错！"));
+				systemLog->PrintStatus(_T("Error:	X维度设置出错！"));
+				return;
+			}
+			delete[] dim;
+			float fDimX = StrToFloat(CStrToStr(dimX));
+			if (fDimX>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimX<=0)
+			{
+				MessageBox(_T("Error:X维度设定值超出设备阈值！"));
+				systemLog->PrintStatus(_T("Error:	X维度设定值超出设备阈值！"));
+				return;
+			}
+			CString info = _T("设置X维度的工作组为--") + dimX;
+			systemLog->PrintStatus(info.GetBuffer());
+			workGroup[0] = fDimX;
+
+		}
+		{
+			CString dimY;
+			wchar_t* dim = new wchar_t[m_DimYEdt.LineLength()];
+			m_DimYEdt.GetLine(0, dim, m_DimYEdt.LineLength());
+			dimY = CString(dim, m_DimYEdt.LineLength());
+			if (dimY.GetLength()<=0)
+			{
+				MessageBox(_T("Error:Y维度设置出错！"));
+				systemLog->PrintStatus(_T("Error:	Y维度设置出错！"));
+				return;
+			}
+			delete[] dim;
+			float fDimY = StrToFloat(CStrToStr(dimY));
+			if (fDimY>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimY<=0)
+			{
+				MessageBox(_T("Error:Y维度设定值超出设备阈值！"));
+				systemLog->PrintStatus(_T("Error:	Y维度设定值超出设备阈值！"));
+				return;
+			}
+			CString info = _T("设置Y维度的工作组为--") + dimY;
+			systemLog->PrintStatus(info.GetBuffer());
+			workGroup[1] = fDimY;
+
+		}
+		{
+			CString dimZ;
+			wchar_t* dim = new wchar_t[m_DimZEdt.LineLength()];
+			m_DimZEdt.GetLine(0, dim, m_DimZEdt.LineLength());
+			dimZ = CString(dim, m_DimZEdt.LineLength());
+			if (dimZ.GetLength()<=0)
+			{
+				MessageBox(_T("Error:Z维度设置出错！"));
+				systemLog->PrintStatus(_T("Error:	Z维度设置出错！"));
+				return;
+			}
+			delete[] dim;
+			float fDimZ = StrToFloat(CStrToStr(dimZ));
+			if (fDimZ>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimZ<=0)
+			{
+				MessageBox(_T("Error:Z维度设定值超出设备阈值！"));
+				systemLog->PrintStatus(_T("Error:	Z维度设定值超出设备阈值！"));
+				return;
+			}
+			CString info = _T("设置Z维度的工作组为--") + dimZ;
+			systemLog->PrintStatus(info.GetBuffer());
+			workGroup[2] = fDimZ;
+
+		}
+		break;
+	default:
+		MessageBox(_T("Error:错误的维度设置！"));
+		systemLog->PrintStatus(_T("Error:	错误的维度设置！\r\n"));
+		return;
+		break;
+	}
+
+	if (m_SelDimNum<=0)
+	{
+		MessageBox(_T("Error:工作组和工作项维度设置错误！"));
+		systemLog->PrintStatus(_T("Error:工作组和工作项维度设置错误！"));
+		return;
+	}
+	m_Render->GetCompObj()->SetNDRange( workGroup, m_SelDimNum);
+	systemLog->PrintStatus(_T("设备工作组和工作项设置成功！——NDRange设置成功！\r\n"));
+
+	//设置SAHSplit方法
+	m_Render->GetCompObj()->SetSAHSplitMethod(m_SelRadio);
+
+	//设置Render相关参数
+	CString reflectCount = GetEdtContent(&m_ReflectCount, _T("迭代次数设置出错！"));
+	if(reflectCount == CString("")) return;
+	CString viewX, viewY, viewZ;
+	CString lightX, lightY, lightZ;
+
+	viewX = GetEdtContent(&m_ViewXEdt, _T("视点位置X坐标设置出错！"));
+	if(viewX == CString("")) return;
+	viewY = GetEdtContent(&m_ViewYEdt, _T("视点位置Y坐标设置出错！"));
+	if(viewY == CString("")) return;
+	viewZ = GetEdtContent(&m_ViewZEdt, _T("视点位姿Z坐标设置出错！"));
+	if(viewZ == CString("")) return;
+	lightX = GetEdtContent(&m_LightXEdt, _T("光源位置X坐标设置出错！"));
+	if(lightX == CString("")) return;
+	lightY = GetEdtContent(&m_LightYEdt, _T("光源位置Y坐标设置出错！"));
+	if(lightY == CString("")) return;
+	lightZ = GetEdtContent(&m_LightZEdt, _T("光源位置Z坐标设置出错！"));
+	if(lightZ == CString("")) return;
+
+	CString info = 
+		_T("渲染参数设置：\r\n	--光线迭代次数：	") + reflectCount + _T("\r\n")
+		+	_T("	--视点位置：	(") + viewX + _T(",") + viewY + _T(",") + viewZ +_T(")\r\n")
+		+	_T("	--光源位置：	(") + lightX + _T(",") + lightY + _T(",") + lightZ + _T(")\r\n");
+
+	systemLog->PrintStatus(info.GetBuffer());
+
+	m_Render->GetCompObj()->SetRenderParam(StrToFloat(CStrToStr(reflectCount)), StrToFloat(CStrToStr(viewX)), StrToFloat(CStrToStr(viewY)), StrToFloat(CStrToStr(viewZ)), StrToFloat(CStrToStr(lightX)), StrToFloat(CStrToStr(lightY)), StrToFloat(CStrToStr(lightZ)));
+
+	m_Render->GetCompObj()->SetParamReady();
+	systemLog->PrintStatus(_T("参数设置完毕！\r\n"));	
+
+	
+}
+
+
+void Cmfc_OpenGL_OpenCLDlg::OnBnClickedCommonSplitRadio()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	m_SelRadio = SAHSPLIT_COMM;
+}
+
+
+void Cmfc_OpenGL_OpenCLDlg::OnBnClickedSAASAHSplitRadio()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	m_SelRadio = SAHSPLIT_SAA;
+}
+
+
+
+
+void Cmfc_OpenGL_OpenCLDlg::OnBnClickedPSOSAHSplitRadio()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	m_SelRadio = SAHSPLIT_PSO;
+}
+
+
+void Cmfc_OpenGL_OpenCLDlg::OnBnClickedOffLineRenderingButton()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	m_Render->GetCompObj()->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
+	m_Render->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
+	m_Render->GetCompObj()->OffLineRendering();
+}
+
+
+void Cmfc_OpenGL_OpenCLDlg::OnBnClickedRealtimeRenderingButton()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	m_Render->GetCompObj()->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
+	m_Render->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
+	m_Render->GetCompObj()->RealTimeRendering();
+}
+
+CRenderDlg* Cmfc_OpenGL_OpenCLDlg::GetRenderDlg()
+{
+	return m_RenderDlg;
 }

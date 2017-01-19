@@ -1,10 +1,11 @@
 // Render.cpp : 实现文件
 //
+#pragma once
 
 #include "stdafx.h"
 #include "mfc_OpenGL_OpenCL.h"
 #include "Render.h"
-
+#include "Log.h"
 
 // CRender
 
@@ -15,13 +16,26 @@ COpenCLCompute* CRender::m_CompObj = NULL;
 CRender::CRender()
 {
 	m_CompObj = new COpenCLCompute;
+	m_ModelInfo = new ModelInfo;
 }
 
 CRender::~CRender()
 {
 	wglMakeCurrent(NULL, NULL);
-	wglDeleteContext(m_hglrc);
-	::ReleaseDC(m_hWnd, m_hdc);
+	wglDeleteContext(m_HGLRC);
+	::ReleaseDC(m_hWnd, m_HDC);
+
+	if ( m_CompObj )
+	{
+		delete m_CompObj;
+		m_CompObj = NULL;
+	}
+
+	if ( m_ModelInfo )
+	{
+		delete m_ModelInfo;
+		m_ModelInfo = NULL;
+	}
 }
 
 
@@ -47,11 +61,11 @@ int CRender::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return 0;
 
 	// 获得绘图描述表
-	m_hdc = ::GetDC(m_hWnd);
+	m_HDC = ::GetDC(m_hWnd);
 	// 创建渲染描述表
-	m_hglrc = wglCreateContext(m_hdc);
+	m_HGLRC = wglCreateContext(m_HDC);
 	// 使绘图描述表为当前调用现程的当前绘图描述表 
-	wglMakeCurrent(m_hdc, m_hglrc); 
+	wglMakeCurrent(m_HDC, m_HGLRC); 
 	return 0;
 }
 
@@ -66,7 +80,7 @@ void CRender::OnPaint()
 	RenderScene();
 	glPopMatrix();
 	glFlush();
-	SwapBuffers(m_hdc);
+	SwapBuffers(m_HDC);
 }
 
 int CRender::CusSetPixelFormat(HDC hDC)
@@ -134,4 +148,26 @@ void CRender::RenderScene()
 COpenCLCompute* CRender::GetCompObj()
 {
 	return m_CompObj;
+}
+
+BOOL CRender::LoadObjInfo(std::string fileName)
+{
+	m_FileName = fileName;
+	return loadOBJ(fileName.c_str(), m_ModelInfo->verts, m_ModelInfo->UVs, m_ModelInfo->normals);
+	
+}
+
+void CRender::InitContext()
+{
+	m_CompObj->InitContext(m_HDC, m_HGLRC);
+}
+
+void CRender::SetSelHardware(int platformIndex /* = 0 */, int deviceIndex /* = 0 */)
+{
+	GetCompObj()->SetSelHardware(platformIndex, deviceIndex);
+}
+
+void CRender::SetRenderDlg(CDialog* dlg)
+{
+	m_RenderDlg = dlg;
 }

@@ -1,11 +1,29 @@
 #pragma once
+
 #include <map>
 #include <vector>
 #include <string>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+
+
 #include <CL/cl.h>
 #include <cl/cl_gl.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <common/objloader.hpp>
+
 #include "afx.h"
+
+enum {
+	SAHSPLIT_COMM	=	0x2000000,
+	SAHSPLIT_SAA	=	0x2000001,
+	SAHSPLIT_PSO	=	0x2000002,
+};
+
 
 struct DeviceInfo
 {
@@ -41,8 +59,25 @@ struct HardwareInfo
 	std::vector<DeviceInfo> deviceInfo;
 };
 
+struct ModelInfo
+{
+	std::vector<glm::vec3> verts;
+	std::vector<glm::vec2> UVs;
+	std::vector<glm::vec3> normals;
+};
+
+struct ConfigInfo
+{
+	int	selPlaformIndex;
+	int	selDeviceIndex;
+	std::vector<int> workGroup;
+	int	reflectCount;
+	std::vector<float> viewPos;
+	std::vector<float> lightPos;
+};
+
 template<typename T>
-std::string TtoStr(T in)
+std::string TToStr(T in)
 {
 	std::ostringstream os;
 	os<<in;
@@ -51,3 +86,7 @@ std::string TtoStr(T in)
 	is>>result;
 	return result;
 }
+
+std::string CStrToStr(CString& str);
+CString	StrToCStr(std::string str);
+float	StrToFloat(std::string& str);

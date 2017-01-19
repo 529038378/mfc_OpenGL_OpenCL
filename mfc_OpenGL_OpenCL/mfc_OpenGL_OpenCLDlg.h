@@ -5,6 +5,8 @@
 #pragma once
 #include "Render.h"
 #include "afxcmn.h"
+#include "afxwin.h"
+#include "RenderDlg.h"
 
 // Cmfc_OpenGL_OpenCLDlg ¶Ô»°¿ò
 class Cmfc_OpenGL_OpenCLDlg : public CDialogEx
@@ -32,15 +34,59 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	CRender* m_Render;
-	enum {PRINT_INFO  = 0x00001000,};
-	HTREEITEM m_root;
-	std::vector<HTREEITEM> m_hardwarePlatformNode;
-	std::vector<HTREEITEM> m_harewareDeviceNode;
-	HardwareInfo* m_hardwareInfo;
+	static Cmfc_OpenGL_OpenCLDlg* m_instance;
+	CRender*	m_Render;
+	enum	{PRINT_INFO  = 0x00001000,};
+	HTREEITEM	m_root;
+	std::vector<HTREEITEM>	m_hardwarePlatformNode;
+	std::vector<HTREEITEM>	m_harewareDeviceNode;
+	HardwareInfo*	m_HardwareInfo;
+	std::string		m_ModelName;
+	int				m_SelPlatformIndex;
+	int				m_SelDeviceIndex;
+	int				m_SelDimNum;
+	int				m_SelRadio;
+	CRenderDlg*		m_RenderDlg;
+
 public:
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	CTreeCtrl m_hardwareInfoTreeCtl;
-	CToolTipCtrl m_toolTip;
-	BOOL PreTranslateMessage(MSG* pMsg);
+	CEdit*	GetStatusEdt();
+	CString	GetEdtContent(CEdit* edit, wchar_t* info);
+	CRenderDlg* GetRenderDlg();
+public:
+	afx_msg int	OnCreate(LPCREATESTRUCT lpCreateStruct);
+	CTreeCtrl	m_hardwareInfoTreeCtl;
+	CToolTipCtrl	m_toolTip;
+	CButton	m_LoadModelBtn;
+	CEdit	m_ModelNameEdt;
+	CEdit	m_StatusEdt;	
+	BOOL	PreTranslateMessage(MSG* pMsg);	
+	afx_msg void	OnBnClickedLoadmodelButton();
+//	afx_msg void OnBnClickedGemodelinfoButton();
+	afx_msg void OnBnClickedGetModeLinfoButton();
+	afx_msg void OnBnClickedInitialContextButton();
+	CComboBox m_PlatformComBox;
+	CComboBox m_DeviceComBox;
+	afx_msg void OnCbnSelchangePlatformsCombo();
+	afx_msg void OnCbnSelchangeDevicesCombo();
+	
+//	CComboBox m_DimChoose;
+	CComboBox m_DimChooseComBox;
+	CEdit m_DimXEdt;
+	CEdit m_DimYEdt;
+	CEdit m_DimZEdt;
+	afx_msg void OnCbnSelchangeDimChooseCombo();
+	afx_msg void OnBnClickedConfigConfirmButton();
+	afx_msg void OnBnClickedCommonSplitRadio();
+	afx_msg void OnBnClickedSAASAHSplitRadio();
+	afx_msg void OnBnClickedPSOSAHSplitRadio();
+	CEdit m_ReflectCount;
+	CEdit m_ViewXEdt;
+//	CEdit m_ViewY;
+	CEdit m_ViewYEdt;
+	CEdit m_ViewZEdt;
+	CEdit m_LightXEdt;
+	CEdit m_LightYEdt;
+	CEdit m_LightZEdt;
+	afx_msg void OnBnClickedOffLineRenderingButton();
+	afx_msg void OnBnClickedRealtimeRenderingButton();
 };

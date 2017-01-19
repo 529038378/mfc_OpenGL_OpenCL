@@ -19,13 +19,20 @@ public:
 	afx_msg void OnPaint();
 
 public:
-	int CusSetPixelFormat(HDC hDC);
-	void RenderScene();
-	COpenCLCompute* GetCompObj();
+	int		CusSetPixelFormat(HDC hDC);
+	void	RenderScene();
+	COpenCLCompute*	GetCompObj();
+	BOOL	LoadObjInfo(std::string fileName);
+	void	InitContext();
+	void	SetSelHardware(int platformIndex = 0, int deviceIndex = 0);	
+	void	SetRenderDlg(CDialog* dlg);
 private:
-	HDC m_hdc;
-	HGLRC m_hglrc;
-	static COpenCLCompute* m_CompObj;
+	HDC		m_HDC;
+	HGLRC	m_HGLRC;
+	static COpenCLCompute*		m_CompObj;
+	ModelInfo*		m_ModelInfo;
+	std::string		m_FileName;
+	CDialog*		m_RenderDlg;
 };
 
 

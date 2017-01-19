@@ -45,6 +45,15 @@
     <ClInclude Include="cusLib.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\OpenGLLib\include\common\objloader.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mfc_OpenGL_OpenCL.cpp">
@@ -60,6 +69,18 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="PrallalCompute.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="cusLib.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\OpenGLLib\include\common\objloader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

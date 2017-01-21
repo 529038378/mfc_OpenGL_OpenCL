@@ -404,7 +404,7 @@ void Cmfc_OpenGL_OpenCLDlg::OnCbnSelchangePlatformsCombo()
 		m_DeviceComBox.InsertString(inItr-itr.deviceInfo.begin(),StrToCStr(inItr->name));
 	}
 
-	CString str = _T("Selected Platform: ") + StrToCStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].name) 
+	CString str = _T("Selected Platform:		") + StrToCStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].name) 
 		+	_T("\r\n	--VenderName:	") + StrToCStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].venderName)
 		+	_T("\r\n	--DeviceNum:	") + StrToCStr(TToStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceNum))
 		+	_T("\r\n");
@@ -441,7 +441,7 @@ void Cmfc_OpenGL_OpenCLDlg::OnCbnSelchangeDevicesCombo()
 	}
 	workItemSize = workItemSize.substr(0, workItemSize.length()-1);
 	workItemSize += ")";
-	CString str = _T("Selected Device:		") + StrToCStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].name)
+	CString str = _T("Selected Device:			") + StrToCStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].name)
 		+	_T("\r\n	--DeviceType:		") + deviceType
 		+	_T("\r\n	--ClockFreq(MHz):		") + StrToCStr(TToStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxClockFreq))
 		+	_T("\r\n	--BitWidth:		")	+ StrToCStr(TToStr(m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].bitWidth))
@@ -454,6 +454,7 @@ void Cmfc_OpenGL_OpenCLDlg::OnCbnSelchangeDevicesCombo()
 		systemLog->PrintStatus(str.GetBuffer());
 
 		//参数设置相关
+		m_DimChooseComBox.ResetContent();
 		for (auto i = 0; i<m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxDimension; i++)
 		{
 			m_DimChooseComBox.AddString(StrToCStr(TToStr(i+1)));
@@ -519,179 +520,91 @@ CString Cmfc_OpenGL_OpenCLDlg::GetEdtContent(CEdit* edit, wchar_t* info)
 	return CString(res, len);
 }
 
+BOOL Cmfc_OpenGL_OpenCLDlg::CheckDimEdt(CEdit* edt, wchar_t* dimName, int index)
+{
+	CString dimX;
+	wchar_t* dim = new wchar_t[edt->LineLength()];
+	m_DimXEdt.GetLine(0, dim, edt->LineLength());
+	dimX = CString(dim, edt->LineLength());
+	if (dimX.GetLength()<=0)
+	{
+		CString info = _T("Error:") + CString(dimName) + _T("维度设置出错！");
+		MessageBox(info.GetBuffer());
+		info = _T("Error:	") + CString(dimName) + _T("维度设置出错！");
+		systemLog->PrintStatus(info.GetBuffer());
+		return FALSE;
+	}
+	delete[] dim;
+	float fDimX = StrToFloat(CStrToStr(dimX));
+	if (fDimX>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimX<=0)
+	{
+		CString info;
+		info = _T("Error:") + CString(dimName) + _T("维度设置出错！");
+		MessageBox(info.GetBuffer());
+		info = _T("Error:	") + CString(dimName) + _T("维度设定值超出设备阈值！");
+		systemLog->PrintStatus(info.GetBuffer());
+		return FALSE;
+	}
+	CString info = _T("设置") + CString(dimName) + _T("维度的工作组为--") + dimX;
+	systemLog->PrintStatus(info.GetBuffer());
+	m_WorkGroup[index] = fDimX;
+	return TRUE;
+
+}
+
 void Cmfc_OpenGL_OpenCLDlg::OnBnClickedConfigConfirmButton()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	//NDRange参数查错
-	std::vector<int> workGroup;
-	workGroup.resize(m_SelDimNum);
-	switch (m_SelDimNum)
+	m_WorkGroup.resize(m_SelDimNum);
+	
+
+	switch(m_SelDimNum)
 	{
 	case 1:
+		if(!CheckDimEdt(&m_DimXEdt, _T("X"), 0)) 
 		{
-			CString dimX;
-			wchar_t* dim = new wchar_t[m_DimXEdt.LineLength()];
-			m_DimXEdt.GetLine(0, dim, m_DimXEdt.LineLength());
-			dimX = CString(dim, m_DimXEdt.LineLength());
-			if (dimX.GetLength()<=0)
-			{
-				MessageBox(_T("Error:X维度设置出错！"));
-				systemLog->PrintStatus(_T("Error:	X维度设置出错！"));
-				return;
-			}
-			delete[] dim;
-			float fDimX = StrToFloat(CStrToStr(dimX));
-			if (fDimX>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimX<=0)
-			{
-				MessageBox(_T("Error:X维度设定值超出设备阈值！"));
-				systemLog->PrintStatus(_T("Error:	X维度设定值超出设备阈值！"));
-				return;
-			}
-			CString info = _T("设置X维度的工作组为--") + dimX;
-			systemLog->PrintStatus(info.GetBuffer());
-			workGroup[0] = fDimX;
-
+			MessageBox(_T("Error:参数初始化失败！"));
+			systemLog->PrintStatus(_T("Error:	参数初始化失败！"));
+			return;
 		}
 		break;
 	case 2:
 		{
-			CString dimX;
-			wchar_t* dim = new wchar_t[m_DimXEdt.LineLength()];
-			m_DimXEdt.GetLine(0, dim, m_DimXEdt.LineLength());
-			dimX = CString(dim, m_DimXEdt.LineLength());
-			if (dimX.GetLength()<=0)
+			auto flagX = CheckDimEdt(&m_DimXEdt, _T("X"), 0);
+			auto flagY = CheckDimEdt(&m_DimYEdt, _T("Y"), 1);
+			if( !flagX || !flagY )
 			{
-				MessageBox(_T("Error:X维度设置出错！"));
-				systemLog->PrintStatus(_T("Error:	X维度设置出错！"));
+				MessageBox(_T("Error:参数初始化失败！"));
+				systemLog->PrintStatus(_T("Error:	参数初始化失败！"));
 				return;
 			}
-			delete[] dim;
-			float fDimX = StrToFloat(CStrToStr(dimX));
-			if (fDimX>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimX<=0)
-			{
-				MessageBox(_T("Error:X维度设定值超出设备阈值！"));
-				systemLog->PrintStatus(_T("Error:	X维度设定值超出设备阈值！"));
-				return;
-			}
-			CString info = _T("设置X维度的工作组为--") + dimX;
-			systemLog->PrintStatus(info.GetBuffer());
-			workGroup[0] = fDimX;
-
-
-		}
-		{
-			CString dimY;
-			wchar_t* dim = new wchar_t[m_DimYEdt.LineLength()];
-			m_DimYEdt.GetLine(0, dim, m_DimYEdt.LineLength());
-			dimY = CString(dim, m_DimYEdt.LineLength());
-			if (dimY.GetLength()<=0)
-			{
-				MessageBox(_T("Error:Y维度设置出错！"));
-				systemLog->PrintStatus(_T("Error:	Y维度设置出错！"));
-				return;
-			}
-			delete[] dim;
-			float fDimY = StrToFloat(CStrToStr(dimY));
-			if (fDimY>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimY<=0)
-			{
-				MessageBox(_T("Error:Y维度设定值超出设备阈值！"));
-				systemLog->PrintStatus(_T("Error:	Y维度设定值超出设备阈值！"));
-				return;
-			}
-			CString info = _T("设置Y维度的工作组为--") + dimY;
-			systemLog->PrintStatus(info.GetBuffer());
-			workGroup[1] = fDimY;
-
 		}
 		break;
 	case 3:
 		{
-			CString dimX;
-			wchar_t* dim = new wchar_t[m_DimXEdt.LineLength()];
-			m_DimXEdt.GetLine(0, dim, m_DimXEdt.LineLength());
-			dimX = CString(dim, m_DimXEdt.LineLength());
-			if (dimX.GetLength()<=0)
+			auto flagX = CheckDimEdt(&m_DimXEdt, _T("X"), 0);
+			auto flagY = CheckDimEdt(&m_DimYEdt, _T("Y"), 1);
+			auto flagZ = CheckDimEdt(&m_DimZEdt, _T("Z"), 2);
+			if ( !flagX || !flagY || !flagZ)
 			{
-				MessageBox(_T("Error:X维度设置出错！"));
-				systemLog->PrintStatus(_T("Error:	X维度设置出错！"));
+				MessageBox(_T("Error:参数初始化失败！"));
+				systemLog->PrintStatus(_T("Error:	参数初始化失败！"));
 				return;
 			}
-			delete[] dim;
-			float fDimX = StrToFloat(CStrToStr(dimX));
-			if (fDimX>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimX<=0)
-			{
-				MessageBox(_T("Error:X维度设定值超出设备阈值！"));
-				systemLog->PrintStatus(_T("Error:	X维度设定值超出设备阈值！"));
-				return;
-			}
-			CString info = _T("设置X维度的工作组为--") + dimX;
-			systemLog->PrintStatus(info.GetBuffer());
-			workGroup[0] = fDimX;
-
-		}
-		{
-			CString dimY;
-			wchar_t* dim = new wchar_t[m_DimYEdt.LineLength()];
-			m_DimYEdt.GetLine(0, dim, m_DimYEdt.LineLength());
-			dimY = CString(dim, m_DimYEdt.LineLength());
-			if (dimY.GetLength()<=0)
-			{
-				MessageBox(_T("Error:Y维度设置出错！"));
-				systemLog->PrintStatus(_T("Error:	Y维度设置出错！"));
-				return;
-			}
-			delete[] dim;
-			float fDimY = StrToFloat(CStrToStr(dimY));
-			if (fDimY>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimY<=0)
-			{
-				MessageBox(_T("Error:Y维度设定值超出设备阈值！"));
-				systemLog->PrintStatus(_T("Error:	Y维度设定值超出设备阈值！"));
-				return;
-			}
-			CString info = _T("设置Y维度的工作组为--") + dimY;
-			systemLog->PrintStatus(info.GetBuffer());
-			workGroup[1] = fDimY;
-
-		}
-		{
-			CString dimZ;
-			wchar_t* dim = new wchar_t[m_DimZEdt.LineLength()];
-			m_DimZEdt.GetLine(0, dim, m_DimZEdt.LineLength());
-			dimZ = CString(dim, m_DimZEdt.LineLength());
-			if (dimZ.GetLength()<=0)
-			{
-				MessageBox(_T("Error:Z维度设置出错！"));
-				systemLog->PrintStatus(_T("Error:	Z维度设置出错！"));
-				return;
-			}
-			delete[] dim;
-			float fDimZ = StrToFloat(CStrToStr(dimZ));
-			if (fDimZ>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimZ<=0)
-			{
-				MessageBox(_T("Error:Z维度设定值超出设备阈值！"));
-				systemLog->PrintStatus(_T("Error:	Z维度设定值超出设备阈值！"));
-				return;
-			}
-			CString info = _T("设置Z维度的工作组为--") + dimZ;
-			systemLog->PrintStatus(info.GetBuffer());
-			workGroup[2] = fDimZ;
-
 		}
 		break;
 	default:
-		MessageBox(_T("Error:错误的维度设置！"));
-		systemLog->PrintStatus(_T("Error:	错误的维度设置！\r\n"));
-		return;
 		break;
 	}
 
 	if (m_SelDimNum<=0)
 	{
 		MessageBox(_T("Error:工作组和工作项维度设置错误！"));
-		systemLog->PrintStatus(_T("Error:工作组和工作项维度设置错误！"));
+		systemLog->PrintStatus(_T("Error:	工作组和工作项维度设置错误！"));
 		return;
 	}
-	m_Render->GetCompObj()->SetNDRange( workGroup, m_SelDimNum);
+	m_Render->GetCompObj()->SetNDRange( m_WorkGroup, m_SelDimNum);
 	systemLog->PrintStatus(_T("设备工作组和工作项设置成功！——NDRange设置成功！\r\n"));
 
 	//设置SAHSplit方法
@@ -699,22 +612,29 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedConfigConfirmButton()
 
 	//设置Render相关参数
 	CString reflectCount = GetEdtContent(&m_ReflectCount, _T("迭代次数设置出错！"));
-	if(reflectCount == CString("")) return;
+	//if(reflectCount == CString("")) return;
 	CString viewX, viewY, viewZ;
 	CString lightX, lightY, lightZ;
 
 	viewX = GetEdtContent(&m_ViewXEdt, _T("视点位置X坐标设置出错！"));
-	if(viewX == CString("")) return;
+	//if(viewX == CString("")) return;
 	viewY = GetEdtContent(&m_ViewYEdt, _T("视点位置Y坐标设置出错！"));
-	if(viewY == CString("")) return;
+	//if(viewY == CString("")) return;
 	viewZ = GetEdtContent(&m_ViewZEdt, _T("视点位姿Z坐标设置出错！"));
-	if(viewZ == CString("")) return;
+	//if(viewZ == CString("")) return;
 	lightX = GetEdtContent(&m_LightXEdt, _T("光源位置X坐标设置出错！"));
-	if(lightX == CString("")) return;
+	//if(lightX == CString("")) return;
 	lightY = GetEdtContent(&m_LightYEdt, _T("光源位置Y坐标设置出错！"));
-	if(lightY == CString("")) return;
+	//if(lightY == CString("")) return;
 	lightZ = GetEdtContent(&m_LightZEdt, _T("光源位置Z坐标设置出错！"));
-	if(lightZ == CString("")) return;
+	//if(lightZ == CString("")) return;
+
+	if (reflectCount == CString("") || viewX == CString("") || viewY == CString("") || viewZ == CString("") || lightX == CString("") || lightY == CString("") || lightZ == CString("")) 
+	{
+		MessageBox(_T("Error:参数初始化失败！"));
+		systemLog->PrintStatus(_T("Error:	参数初始化失败！"));
+		return;
+	}
 
 	CString info = 
 		_T("渲染参数设置：\r\n	--光线迭代次数：	") + reflectCount + _T("\r\n")

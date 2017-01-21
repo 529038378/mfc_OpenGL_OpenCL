@@ -47,11 +47,12 @@ private:
 	int				m_SelDimNum;
 	int				m_SelRadio;
 	CRenderDlg*		m_RenderDlg;
-
+	std::vector<int> m_WorkGroup;
 public:
 	CEdit*	GetStatusEdt();
 	CString	GetEdtContent(CEdit* edit, wchar_t* info);
 	CRenderDlg* GetRenderDlg();
+	BOOL	CheckDimEdt(CEdit* edt, wchar_t* dimName, int index);
 public:
 	afx_msg int	OnCreate(LPCREATESTRUCT lpCreateStruct);
 	CTreeCtrl	m_hardwareInfoTreeCtl;

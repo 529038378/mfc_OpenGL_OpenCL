@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Render.h"
+#include "afxwin.h"
 // CRenderDlg ¶Ô»°¿ò
 
 class CRenderDlg : public CDialogEx
@@ -27,4 +28,8 @@ private:
 public:
 	CRenderDlg* GetInstance();
 	CRender*	GetRenderObj();
+	HWND		GetHandle();
+	void		Display();
+//	CButton m_RenderDisplayBtn;
+	afx_msg void OnBnClickedRenderDisplayButton();
 };

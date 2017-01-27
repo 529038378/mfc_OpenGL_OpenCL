@@ -96,7 +96,8 @@ struct ConfigInfo
 {
 	int	selPlaformIndex;
 	int	selDeviceIndex;
-	std::vector<int> workGroup;
+	std::vector<size_t> workGlobalGroup;
+	std::vector<size_t> workLocalGroup;
 	int	reflectCount;
 	std::vector<float> viewPos;
 	std::vector<float> lightPos;

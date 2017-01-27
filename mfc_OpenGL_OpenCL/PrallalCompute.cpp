@@ -249,13 +249,16 @@ void COpenCLCompute::SetGLCLShared(bool flag /* = false */)
 	m_GLCLShared = flag;
 }
 
-void COpenCLCompute::SetNDRange(std::vector<int>& workGroup, int dim /* = 0 */ )
+void COpenCLCompute::SetNDRange(std::vector<int>& workGlobalGroup, std::vector<int>& workLocalGroup, int dim /* = 0 */ )
 {
 	
-	m_ConfigInfo->workGroup.resize(dim);
-	for (auto itr = m_ConfigInfo->workGroup.begin(); itr != m_ConfigInfo->workGroup.end(); itr++)
+	m_ConfigInfo->workGlobalGroup.resize(dim);
+	m_ConfigInfo->workLocalGroup.resize(dim);
+	for (auto itr = m_ConfigInfo->workGlobalGroup.begin(); itr != m_ConfigInfo->workGlobalGroup.end(); itr++)
 	{
-		*itr = workGroup[itr-m_ConfigInfo->workGroup.begin()];
+		int index = itr - m_ConfigInfo->workGlobalGroup.begin();
+		m_ConfigInfo->workGlobalGroup[index] = workGlobalGroup[index];
+		m_ConfigInfo->workLocalGroup[index] = workLocalGroup[index];
 	}
 	
 }
@@ -270,11 +273,11 @@ void COpenCLCompute::SetSAHSplitMethod(int method)
 		break;
 	case SAHSPLIT_SAA:
 		m_SAHSplitKernel = m_SAASAHSplitKernel;
-		systemLog->PrintStatus(_T("使用模拟退火方法"));
+		systemLog->PrintStatus(_T("使用模拟退火方法进行SAH划分！"));
 		break;
 	case SAHSPLIT_PSO:
 		m_SAHSplitKernel = m_PSOSAHSplitKernel;
-		systemLog->PrintStatus(_T("使用粒子群方法"));
+		systemLog->PrintStatus(_T("使用粒子群方法进行SAH划分！"));
 		break;
 	default: 
 		break;
@@ -283,7 +286,7 @@ void COpenCLCompute::SetSAHSplitMethod(int method)
 
 void COpenCLCompute::SetRenderParam(int count /* = 0 */, int viewX /* = 0 */, int viewY /* = 0 */, int viewZ /* = 0 */, int lightX /* = 0 */, int lightY /* = 0 */, int lightZ /* = 0 */)
 {
-	m_ReflectCount = count;
+	m_ConfigInfo->reflectCount = count;
 
 	m_ConfigInfo->lightPos[0] = lightX;
 	m_ConfigInfo->lightPos[1] = lightY;
@@ -320,17 +323,28 @@ BOOL COpenCLCompute::OffLineRendering()
 
 	//计算PBO_Mem
 	m_PBOMem = clCreateFromGLBuffer(m_Context, CL_MEM_WRITE_ONLY, m_PBO, &iStatus);
-
 	if(!CheckError(iStatus, _T("建立PBO"))) return FALSE;
 	
-	clSetKernelArg(m_SAHSplitKernel, 1, sizeof(cl_mem), &m_PBOMem);
+	clSetKernelArg(m_SAHSplitKernel, 0, sizeof(cl_mem), &m_PBOMem);
 	
+	glFinish();
+	iStatus = clEnqueueAcquireGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
+	CheckError(iStatus, _T("获取GL环境下的PBO控制权"));
+	iStatus = clEnqueueNDRangeKernel(m_Queue, m_RayTraceKernel, m_ConfigInfo->workGlobalGroup.size(), NULL, &m_ConfigInfo->workGlobalGroup[0], &m_ConfigInfo->workLocalGroup[0], 0, 0, 0);
+	CheckError(iStatus, _T("计算PBO"));
+	clFinish(m_Queue);
+	iStatus = clEnqueueReleaseGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
+	CheckError(iStatus, _T("释放CL环境下的PBO控制权"));
+
+	std::vector<unsigned char> tmpData(ciRenderWinHeight*ciRenderWinWidth);
+	clEnqueueReadBuffer(m_Queue, m_PBOMem, CL_TRUE, 0, ciRenderWinHeight*ciRenderWinWidth*sizeof(unsigned char), &tmpData[0], 0, 0, 0);
 	systemLog->PrintStatus(_T("离线渲染成功！"));
 	return TRUE;
 }
 
 BOOL COpenCLCompute::RealTimeRendering()
 {
+	cl_int iStatus;
 	if(!m_ContextReady)
 	{
 		MessageBox(AfxGetMainWnd()->m_hWnd,_T("Error:运算环境未初始化！"), NULL, 0);

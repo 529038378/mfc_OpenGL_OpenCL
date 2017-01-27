@@ -358,7 +358,7 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedLoadmodelButton()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	// 设置过滤器   
-	TCHAR szFilter[] = _T("文本文件(*.obj)|*.obj|所有文件(*.*)|*.*||");   
+	TCHAR szFilter[] = _T("模型文件(*.obj)|*.obj|所有文件(*.*)|*.*||");   
 	// 构造打开文件对话框   
 	CFileDialog fileDlg(TRUE, _T("obj"), NULL, 0, szFilter, this);   
 	CString strFilePath;   
@@ -382,7 +382,7 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedGetModeLinfoButton()
 	// TODO: 在此添加控件通知处理程序代码
 	if (m_Render->LoadObjInfo(m_ModelName))
 	{
-		MessageBox(_T("模型数据读取完毕！"));
+		//MessageBox(_T("模型数据读取完毕！"));
 		systemLog->PrintStatus(_T("模型数据读取完成！\r\n"));
 	}
 	else
@@ -554,7 +554,7 @@ BOOL Cmfc_OpenGL_OpenCLDlg::CheckDimEdt(CEdit* edt, wchar_t* dimName, int index,
 	}
 	delete[] dim;
 	float fDimInfo = StrToFloat(CStrToStr(dimInfo));
-	if (fDimInfo>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimInfo<=0)
+	if (fDimInfo>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[index] || fDimInfo<=0)
 	{
 		CString info;
 		info = _T("Error:") + CString(dimName) + _T("维度设置出错！");
@@ -636,7 +636,7 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedConfigConfirmButton()
 		systemLog->PrintStatus(_T("Error:	工作组和工作项维度设置错误！"));
 		return;
 	}
-	m_Render->GetCompObj()->SetNDRange( m_WorkGlobalGroup, m_SelDimNum);
+	m_Render->GetCompObj()->SetNDRange( m_WorkGlobalGroup, m_WorkLocalGroup, m_SelDimNum);
 	systemLog->PrintStatus(_T("设备工作组和工作项设置成功！——NDRange设置成功！\r\n"));
 
 	//设置SAHSplit方法

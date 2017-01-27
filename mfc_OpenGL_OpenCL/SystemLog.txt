@@ -62,5 +62,9 @@ Selected Device:			GeForce 940MX
 
 建立PBO--成功！
 
-离线渲染成功！
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
 

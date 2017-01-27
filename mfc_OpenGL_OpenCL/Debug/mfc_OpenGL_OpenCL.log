@@ -1,11 +1,20 @@
-﻿生成启动时间为 2017/1/27 3:47:46。
+﻿生成启动时间为 2017/1/27 21:50:04。
      1>项目“D:\learning\Graduation_design\mfc_OpenGL_OpenCL\mfc_OpenGL_OpenCL\mfc_OpenGL_OpenCL.vcxproj”在节点 2 上(build 个目标)。
      1>InitializeBuildStatus:
          正在创建“Debug\mfc_OpenGL_OpenCL.unsuccessfulbuild”，因为已指定“AlwaysCreate”。
        ClCompile:
          所有输出均为最新。
-         D:\software\VS2010\VC\bin\CL.exe /c /I"D:\software\OpenCL\OpenCL SDK\6.3\include" /ID:\learning\OpenGLLib\include /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _UNICODE /D UNICODE /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Render.cpp
-         Render.cpp
+         D:\software\VS2010\VC\bin\CL.exe /c /I"D:\software\OpenCL\OpenCL SDK\6.3\include" /ID:\learning\OpenGLLib\include /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _UNICODE /D UNICODE /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt PrallalCompute.cpp
+         PrallalCompute.cpp
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(199): warning C4244: “=”: 从“std::streamoff”转换到“size_t”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(233): warning C4996: 'clCreateCommandQueue': 被声明为已否决
+                 d:\software\opencl\opencl sdk\6.3\include\cl\cl.h(1428) : 参见“clCreateCommandQueue”的声明
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(291): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(292): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(293): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(295): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(296): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(297): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
        ResourceCompile:
          所有输出均为最新。
        ManifestResourceCompile:
@@ -36,4 +45,4 @@
 
 生成成功。
 
-已用时间 00:00:07.83
+已用时间 00:00:04.91

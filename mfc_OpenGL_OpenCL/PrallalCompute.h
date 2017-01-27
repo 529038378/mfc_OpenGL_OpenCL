@@ -11,7 +11,7 @@ public:
 	virtual HardwareInfo* GetHardwareInfo() = 0;
 	virtual void InitContext()= 0;
 	virtual void SetGLCLShared(bool flag = false) = 0;
-	virtual void SetNDRange(std::vector<int>&, int dim = 0) = 0;
+	virtual void SetNDRange(std::vector<int>&, std::vector<int>&, int dim = 0) = 0;
 	virtual BOOL OffLineRendering() = 0;
 	virtual BOOL RealTimeRendering() = 0;
 };
@@ -30,7 +30,7 @@ public:
 	virtual void InitContext();
 	virtual void SetGLCLShared(bool flag = false);
 	virtual void SetSelHardware(int platformIndex = 0, int deviceIndex = 0);
-	virtual void SetNDRange(std::vector<int>& workGroup, int dim = 0);
+	virtual void SetNDRange(std::vector<int>& workGlobalGroup, std::vector<int>& workLocalGroup, int dim = 0);
 	virtual	void SetSAHSplitMethod(int method);
 	virtual void SetRenderParam(int count = 0, int viewX = 0, int viewY = 0, int viewZ = 0, int lightX = 0, int lightY = 0, int lightZ = 0);
 	virtual void SetParamReady(bool flagParam = true);

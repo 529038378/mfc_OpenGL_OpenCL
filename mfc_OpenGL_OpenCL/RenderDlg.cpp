@@ -25,10 +25,12 @@ CRenderDlg::~CRenderDlg()
 void CRenderDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	//  DDX_Control(pDX, IDC_RENDERDISPLAY_BUTTON, m_RenderDisplayBtn);
 }
 
 
 BEGIN_MESSAGE_MAP(CRenderDlg, CDialogEx)
+	ON_BN_CLICKED(IDC_RENDERDISPLAY_BUTTON, &CRenderDlg::OnBnClickedRenderDisplayButton)
 END_MESSAGE_MAP()
 
 
@@ -50,11 +52,9 @@ BOOL CRenderDlg::OnInitDialog()
 	if (!m_Render)
 	{
 		m_Render = new CRender;
-		m_Render->Create(NULL, NULL, WS_CHILDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE, dlgRect, this, 0);
 	}
-	
+	m_Render->Create(NULL, NULL, WS_CHILDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE, dlgRect, this, 0);
 
-	
 	static int flag = 1;
 	if (flag--) CDialogEx::OnOK();
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -71,3 +71,21 @@ CRenderDlg* CRenderDlg::GetInstance()
 	return m_instance;
 }
 
+HWND CRenderDlg::GetHandle()
+{
+	return GetSafeHwnd();
+}
+
+void CRenderDlg::Display()
+{
+	HWND hwnd = this->m_hWnd;
+	Invalidate(TRUE);
+	UpdateWindow();
+	DoModal();
+}
+
+void CRenderDlg::OnBnClickedRenderDisplayButton()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	//HWND hwnd = m_Render->GetSafeHwnd();
+}

@@ -54,6 +54,9 @@
     <ClInclude Include="RenderDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\OpenGLLib\include\common\shader.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mfc_OpenGL_OpenCL.cpp">
@@ -81,6 +84,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="RenderDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\OpenGLLib\include\common\shader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

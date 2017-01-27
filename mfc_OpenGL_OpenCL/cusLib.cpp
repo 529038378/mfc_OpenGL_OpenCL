@@ -3,6 +3,7 @@
 CString statusInfo;
 
 
+
 std::string CStrToStr(CString& str)
 {
 	wchar_t* wText = str.GetBuffer();

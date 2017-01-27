@@ -12,7 +12,7 @@ public:
 	virtual ~CRenderDlg();
 
 // 对话框数据
-	enum { IDD = IDD_DIALOG1 };
+	enum { IDD = IDD_RENDER_DIALOG };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
@@ -23,7 +23,7 @@ public:
 
 private:
 	static CRenderDlg*	m_instance;
-	CRender*			m_Render;
+	static CRender*			m_Render;
 public:
 	CRenderDlg* GetInstance();
 	CRender*	GetRenderObj();

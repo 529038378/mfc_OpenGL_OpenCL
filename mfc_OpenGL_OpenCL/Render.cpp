@@ -66,6 +66,51 @@ int CRender::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_HGLRC = wglCreateContext(m_HDC);
 	// 使绘图描述表为当前调用现程的当前绘图描述表 
 	wglMakeCurrent(m_HDC, m_HGLRC); 
+
+	if ( glewInit() != GLEW_OK)
+	{
+		MessageBox(_T("glew初始化失败！"));
+		exit(0);
+	}
+
+	SetDC();
+	//初始化渲染环境各参数
+	glGenTextures(1, &m_RenderTexture);
+	glBindTexture(GL_TEXTURE_2D, m_RenderTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ciRenderWinWidth, ciRenderWinHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ciRenderWinWidth, ciRenderWinHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glBindTexture(0, m_RenderTexture);
+
+
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_RenderTexture, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glGenBuffers(1, &m_VertArrayID);
+	glBindVertexArray(m_VertArrayID);
+
+	glGenBuffers(1, &m_QuadVert);
+	glBindBuffer(GL_ARRAY_BUFFER, m_QuadVert);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cfQuadVertBuffer), cfQuadVertBuffer, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &m_PBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_PBO);
+	glBufferData(GL_ARRAY_BUFFER, ciRenderWinWidth*ciRenderWinHeight*sizeof(unsigned char), 0, GL_STREAM_DRAW);
+
+	glGenBuffers(1, &m_UV);
+	glBindBuffer(GL_ARRAY_BUFFER, m_UV);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(UV), UV, GL_STATIC_DRAW);
+	m_Program = LoadShaders("vert.vs","frag.fs");
+	m_TexID = glGetUniformLocation(m_Program, "renderedTexture");
+	glClearColor(153.0f, 51.0f, 250.0f, 0.0f);
+
+	SetPBO();
+
 	return 0;
 }
 
@@ -137,12 +182,58 @@ int CRender::CusSetPixelFormat(HDC hDC)
 	return TRUE;
 }
 
+void CRender::SetPBO()
+{
+	GetCompObj()->SetPBO(m_PBO);
+}
+
 void CRender::RenderScene()
 {
-	glBegin(GL_LINES);
+	/*glBegin(GL_LINES);
 	glVertex2f(-0.5f, -0.3f);
 	glVertex2f(0.4f, 0.6f);
-	glEnd();
+	glEnd();*/
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_PBO);
+	glBindTexture(GL_TEXTURE_2D, m_RenderTexture);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, ciRenderWinWidth, ciRenderWinHeight, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, ciRenderWinWidth, ciRenderWinHeight);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glUseProgram(m_Program);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_RenderTexture);
+	glUniform1i(m_TexID, 0);
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, m_QuadVert);
+	glVertexAttribPointer(
+		0,
+		3,
+		GL_FLOAT,
+		GL_FALSE,
+		0,
+		(void*)0
+		);
+
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, m_UV);
+	glVertexAttribPointer(
+		1,
+		2,
+		GL_FLOAT,
+		GL_FALSE,
+		0,
+		(void*)0
+		);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
 COpenCLCompute* CRender::GetCompObj()
@@ -159,7 +250,12 @@ BOOL CRender::LoadObjInfo(std::string fileName)
 
 void CRender::InitContext()
 {
-	m_CompObj->InitContext(m_HDC, m_HGLRC);
+	m_CompObj->InitContext();
+}
+
+void CRender::SetDC()
+{
+	m_CompObj->SetDC(m_HDC, m_HGLRC);
 }
 
 void CRender::SetSelHardware(int platformIndex /* = 0 */, int deviceIndex /* = 0 */)

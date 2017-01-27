@@ -46,13 +46,14 @@ private:
 	int				m_SelDeviceIndex;
 	int				m_SelDimNum;
 	int				m_SelRadio;
-	CRenderDlg*		m_RenderDlg;
-	std::vector<int> m_WorkGroup;
+	static CRenderDlg*		m_RenderDlg;
+	std::vector<int> m_WorkGlobalGroup;
+	std::vector<int> m_WorkLocalGroup;
 public:
 	CEdit*	GetStatusEdt();
 	CString	GetEdtContent(CEdit* edit, wchar_t* info);
 	CRenderDlg* GetRenderDlg();
-	BOOL	CheckDimEdt(CEdit* edt, wchar_t* dimName, int index);
+	BOOL	CheckDimEdt(CEdit* edt, wchar_t* dimName, int index, bool flag = true);
 public:
 	afx_msg int	OnCreate(LPCREATESTRUCT lpCreateStruct);
 	CTreeCtrl	m_hardwareInfoTreeCtl;
@@ -72,9 +73,9 @@ public:
 	
 //	CComboBox m_DimChoose;
 	CComboBox m_DimChooseComBox;
-	CEdit m_DimXEdt;
-	CEdit m_DimYEdt;
-	CEdit m_DimZEdt;
+	CEdit m_DimGXEdt;
+	CEdit m_DimGYEdt;
+	CEdit m_DimGZEdt;
 	afx_msg void OnCbnSelchangeDimChooseCombo();
 	afx_msg void OnBnClickedConfigConfirmButton();
 	afx_msg void OnBnClickedCommonSplitRadio();
@@ -90,4 +91,7 @@ public:
 	CEdit m_LightZEdt;
 	afx_msg void OnBnClickedOffLineRenderingButton();
 	afx_msg void OnBnClickedRealtimeRenderingButton();
+	CEdit m_DimLXEdt;
+	CEdit m_DimLYEdt;
+	CEdit m_DimLZEdt;
 };

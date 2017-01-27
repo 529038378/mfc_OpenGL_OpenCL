@@ -13,6 +13,7 @@ COpenCLCompute::COpenCLCompute()
 	m_ConfigInfo->lightPos.resize(3);
 	m_ContextReady = false;
 	m_ParamReady = false;
+
 }
 
 COpenCLCompute::~COpenCLCompute()
@@ -160,7 +161,7 @@ DeviceInfo COpenCLCompute::GetDeviceInfo(std::vector<cl_device_id>::iterator& it
 	return deviceInfo;
 }
 
-void COpenCLCompute::InitContext(HDC& hDC, HGLRC& hglrc)
+void COpenCLCompute::InitContext()
 {
 	//设置context
 	cl_int iStatus;
@@ -168,9 +169,9 @@ void COpenCLCompute::InitContext(HDC& hDC, HGLRC& hglrc)
 	{
 		cl_context_properties clProp[]= {
 		CL_GL_CONTEXT_KHR,
-		(cl_context_properties)hglrc,
+		(cl_context_properties)m_HGLRC,
 		CL_WGL_HDC_KHR,
-		(cl_context_properties)hDC,
+		(cl_context_properties)m_HDC,
 		CL_CONTEXT_PLATFORM,
 		(cl_context_properties)m_HardwareInfo->platformIDs[m_ConfigInfo->selPlaformIndex],
 		0
@@ -299,45 +300,73 @@ void COpenCLCompute::SetParamReady(bool flagParam /* = true */)
 	
 }
 
-void COpenCLCompute::OffLineRendering()
+
+
+BOOL COpenCLCompute::OffLineRendering()
 {
+	cl_int iStatus;
 	if(!m_ContextReady)
 	{
 		MessageBox(AfxGetMainWnd()->m_hWnd,_T("Error:运算环境未初始化！"), NULL, 0);
 		systemLog->PrintStatus(_T("Error:	运算环境未初始化！"));
-		return;
+		return FALSE;
 	}
 	if (!m_ParamReady)
 	{
 		MessageBox(AfxGetMainWnd()->m_hWnd,_T("Error:参数设置出错！"), NULL, 0);
 		systemLog->PrintStatus(_T("Error:	参数设置出错！"));
-		return;
+		return FALSE;
 	}
 
-	ASSERT(m_RenderDlg);
-	m_RenderDlg->DoModal();
+	//计算PBO_Mem
+	m_PBOMem = clCreateFromGLBuffer(m_Context, CL_MEM_WRITE_ONLY, m_PBO, &iStatus);
+
+	if(!CheckError(iStatus, _T("建立PBO"))) return FALSE;
+	
+	clSetKernelArg(m_SAHSplitKernel, 1, sizeof(cl_mem), &m_PBOMem);
+	
+	systemLog->PrintStatus(_T("离线渲染成功！"));
+	return TRUE;
 }
 
-void COpenCLCompute::RealTimeRendering()
+BOOL COpenCLCompute::RealTimeRendering()
 {
 	if(!m_ContextReady)
 	{
 		MessageBox(AfxGetMainWnd()->m_hWnd,_T("Error:运算环境未初始化！"), NULL, 0);
 		systemLog->PrintStatus(_T("Error:	运算环境未初始化！"));
-		return;
+		return FALSE;
 	}
 	if (!m_ParamReady)
 	{
 		MessageBox(AfxGetMainWnd()->m_hWnd,_T("Error:参数设置出错！"), NULL, 0);
 		systemLog->PrintStatus(_T("Error:	参数设置出错！"));
-		return;
+		return FALSE;
 	}
 
-	ASSERT(m_RenderDlg);
-	m_RenderDlg->DoModal();
+	//计算PBO_Mem
+	m_PBOMem = clCreateFromGLBuffer(m_Context, CL_MEM_WRITE_ONLY, m_PBO, &iStatus);
+
+	if(!CheckError(iStatus, _T("建立PBO"))) return FALSE;
+
+	clSetKernelArg(m_SAHSplitKernel, 1, sizeof(cl_mem), &m_PBOMem);
+
+	systemLog->PrintStatus(_T("实时渲染成功！"));
+	return TRUE;
 }
 
 void COpenCLCompute::SetRenderDlg(CDialog* dlg)
 {
 	m_RenderDlg = dlg;
+}
+
+void COpenCLCompute::SetPBO(GLuint& pbo)
+{
+	m_PBO = pbo;
+}
+
+void COpenCLCompute::SetDC(HDC& hdc, HGLRC& hglrc)
+{
+	m_HDC = hdc;
+	m_HGLRC = hglrc;
 }

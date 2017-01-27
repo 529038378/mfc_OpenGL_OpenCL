@@ -40,199 +40,27 @@ Selected Device:			GeForce 940MX
 运算环境初始化——成功！
 
 
-设置NDRange维度为3！
+设置NDRange维度为1！
 
-设置X维度的工作组为--1
+设置GX维度的工作组为--128
 
-设置Y维度的工作组为--1
-
-Error:	Z维度设置出错！
-
-Error:	参数初始化失败！
-
-设置X维度的工作组为--1
-
-设置Y维度的工作组为--1
-
-设置Z维度的工作组为--1
+设置GX维度的工作组为--128
 
 设备工作组和工作项设置成功！——NDRange设置成功！
 
 
 使用常规SAH划分方法！
 
-Error:	迭代次数设置出错！
-
-Error:	视点位置X坐标设置出错！
-
-Error:	视点位置Y坐标设置出错！
-
-Error:	视点位姿Z坐标设置出错！
-
-Error:	光源位置X坐标设置出错！
-
-Error:	光源位置Y坐标设置出错！
-
-Error:	光源位置Z坐标设置出错！
-
-Error:	参数初始化失败！
-
-Selected Platform:		NVIDIA CUDA
-	--VenderName:	NVIDIA Corporation
-	--DeviceNum:	1
+渲染参数设置：
+	--光线迭代次数：	1
+	--视点位置：	(1,1,1)
+	--光源位置：	(1,1,1)
 
 
-Selected Device:			GeForce 940MX
-	--DeviceType:		GPU
-	--ClockFreq(MHz):		1241
-	--BitWidth:		32
-	--GlobalMemSize(MB):	2048
-	--LocalMemSize(KB):	48
-	--MaxComputeUnitNum:	3
-	--MaxWorkItemSize:	(1024,1024,64)
-	--OpenCLVersion:		OpenCL 1.2 CUDA
+参数设置完毕！
 
 
-Selected Device:			GeForce 940MX
-	--DeviceType:		GPU
-	--ClockFreq(MHz):		1241
-	--BitWidth:		32
-	--GlobalMemSize(MB):	2048
-	--LocalMemSize(KB):	48
-	--MaxComputeUnitNum:	3
-	--MaxWorkItemSize:	(1024,1024,64)
-	--OpenCLVersion:		OpenCL 1.2 CUDA
+建立PBO--成功！
 
-
-Selected Device:			GeForce 940MX
-	--DeviceType:		GPU
-	--ClockFreq(MHz):		1241
-	--BitWidth:		32
-	--GlobalMemSize(MB):	2048
-	--LocalMemSize(KB):	48
-	--MaxComputeUnitNum:	3
-	--MaxWorkItemSize:	(1024,1024,64)
-	--OpenCLVersion:		OpenCL 1.2 CUDA
-
-
-Selected Device:			GeForce 940MX
-	--DeviceType:		GPU
-	--ClockFreq(MHz):		1241
-	--BitWidth:		32
-	--GlobalMemSize(MB):	2048
-	--LocalMemSize(KB):	48
-	--MaxComputeUnitNum:	3
-	--MaxWorkItemSize:	(1024,1024,64)
-	--OpenCLVersion:		OpenCL 1.2 CUDA
-
-
-Selected Device:			GeForce 940MX
-	--DeviceType:		GPU
-	--ClockFreq(MHz):		1241
-	--BitWidth:		32
-	--GlobalMemSize(MB):	2048
-	--LocalMemSize(KB):	48
-	--MaxComputeUnitNum:	3
-	--MaxWorkItemSize:	(1024,1024,64)
-	--OpenCLVersion:		OpenCL 1.2 CUDA
-
-
-Selected Device:			GeForce 940MX
-	--DeviceType:		GPU
-	--ClockFreq(MHz):		1241
-	--BitWidth:		32
-	--GlobalMemSize(MB):	2048
-	--LocalMemSize(KB):	48
-	--MaxComputeUnitNum:	3
-	--MaxWorkItemSize:	(1024,1024,64)
-	--OpenCLVersion:		OpenCL 1.2 CUDA
-
-
-Selected Device:			GeForce 940MX
-	--DeviceType:		GPU
-	--ClockFreq(MHz):		1241
-	--BitWidth:		32
-	--GlobalMemSize(MB):	2048
-	--LocalMemSize(KB):	48
-	--MaxComputeUnitNum:	3
-	--MaxWorkItemSize:	(1024,1024,64)
-	--OpenCLVersion:		OpenCL 1.2 CUDA
-
-
-Selected Device:			GeForce 940MX
-	--DeviceType:		GPU
-	--ClockFreq(MHz):		1241
-	--BitWidth:		32
-	--GlobalMemSize(MB):	2048
-	--LocalMemSize(KB):	48
-	--MaxComputeUnitNum:	3
-	--MaxWorkItemSize:	(1024,1024,64)
-	--OpenCLVersion:		OpenCL 1.2 CUDA
-
-
-Selected Device:			GeForce 940MX
-	--DeviceType:		GPU
-	--ClockFreq(MHz):		1241
-	--BitWidth:		32
-	--GlobalMemSize(MB):	2048
-	--LocalMemSize(KB):	48
-	--MaxComputeUnitNum:	3
-	--MaxWorkItemSize:	(1024,1024,64)
-	--OpenCLVersion:		OpenCL 1.2 CUDA
-
-
-Selected Device:			GeForce 940MX
-	--DeviceType:		GPU
-	--ClockFreq(MHz):		1241
-	--BitWidth:		32
-	--GlobalMemSize(MB):	2048
-	--LocalMemSize(KB):	48
-	--MaxComputeUnitNum:	3
-	--MaxWorkItemSize:	(1024,1024,64)
-	--OpenCLVersion:		OpenCL 1.2 CUDA
-
-
-Selected Device:			GeForce 940MX
-	--DeviceType:		GPU
-	--ClockFreq(MHz):		1241
-	--BitWidth:		32
-	--GlobalMemSize(MB):	2048
-	--LocalMemSize(KB):	48
-	--MaxComputeUnitNum:	3
-	--MaxWorkItemSize:	(1024,1024,64)
-	--OpenCLVersion:		OpenCL 1.2 CUDA
-
-
-Selected Device:			GeForce 940MX
-	--DeviceType:		GPU
-	--ClockFreq(MHz):		1241
-	--BitWidth:		32
-	--GlobalMemSize(MB):	2048
-	--LocalMemSize(KB):	48
-	--MaxComputeUnitNum:	3
-	--MaxWorkItemSize:	(1024,1024,64)
-	--OpenCLVersion:		OpenCL 1.2 CUDA
-
-
-Selected Device:			GeForce 940MX
-	--DeviceType:		GPU
-	--ClockFreq(MHz):		1241
-	--BitWidth:		32
-	--GlobalMemSize(MB):	2048
-	--LocalMemSize(KB):	48
-	--MaxComputeUnitNum:	3
-	--MaxWorkItemSize:	(1024,1024,64)
-	--OpenCLVersion:		OpenCL 1.2 CUDA
-
-
-Selected Device:			GeForce 940MX
-	--DeviceType:		GPU
-	--ClockFreq(MHz):		1241
-	--BitWidth:		32
-	--GlobalMemSize(MB):	2048
-	--LocalMemSize(KB):	48
-	--MaxComputeUnitNum:	3
-	--MaxWorkItemSize:	(1024,1024,64)
-	--OpenCLVersion:		OpenCL 1.2 CUDA
-
+离线渲染成功！
 

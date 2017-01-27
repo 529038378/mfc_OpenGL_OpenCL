@@ -9,11 +9,11 @@ class CPraCompute
 {
 public:
 	virtual HardwareInfo* GetHardwareInfo() = 0;
-	virtual void InitContext(HDC&, HGLRC&)= 0;
+	virtual void InitContext()= 0;
 	virtual void SetGLCLShared(bool flag = false) = 0;
 	virtual void SetNDRange(std::vector<int>&, int dim = 0) = 0;
-	virtual void OffLineRendering() = 0;
-	virtual void RealTimeRendering() = 0;
+	virtual BOOL OffLineRendering() = 0;
+	virtual BOOL RealTimeRendering() = 0;
 };
 
 class COpenCLCompute : public CPraCompute
@@ -27,16 +27,19 @@ public:
 	virtual PlatformInfo GetPlatformInfo(std::vector<cl_platform_id>::iterator& itr);
 	virtual DeviceInfo GetDeviceInfo(std::vector<cl_device_id>::iterator& itr);
 
-	virtual void InitContext(HDC& hDC, HGLRC& hglrc);
+	virtual void InitContext();
 	virtual void SetGLCLShared(bool flag = false);
 	virtual void SetSelHardware(int platformIndex = 0, int deviceIndex = 0);
 	virtual void SetNDRange(std::vector<int>& workGroup, int dim = 0);
 	virtual	void SetSAHSplitMethod(int method);
 	virtual void SetRenderParam(int count = 0, int viewX = 0, int viewY = 0, int viewZ = 0, int lightX = 0, int lightY = 0, int lightZ = 0);
 	virtual void SetParamReady(bool flagParam = true);
-	virtual void OffLineRendering();
-	virtual void RealTimeRendering();
+	virtual BOOL OffLineRendering();
+	virtual BOOL RealTimeRendering();
 	virtual void SetRenderDlg(CDialog* dlg);
+	virtual void SetPBO(GLuint& pbo);
+	virtual void SetDC(HDC& hdc, HGLRC& hglrc);
+
 private:
 	HardwareInfo*	m_HardwareInfo;
 	cl_context		m_Context;
@@ -55,6 +58,11 @@ private:
 	bool			m_ContextReady;
 	bool			m_ParamReady;
 	CDialog*		m_RenderDlg;
+	GLuint			m_PBO;
+	cl_mem			m_PBOMem;
+	HDC				m_HDC;
+	HGLRC			m_HGLRC;
+	
 };
 
 

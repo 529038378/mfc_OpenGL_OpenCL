@@ -58,7 +58,7 @@ END_MESSAGE_MAP()
 
 // Cmfc_OpenGL_OpenCLDlg 对话框
 
-
+CRenderDlg* Cmfc_OpenGL_OpenCLDlg::m_RenderDlg = NULL;
 
 
 Cmfc_OpenGL_OpenCLDlg::Cmfc_OpenGL_OpenCLDlg(CWnd* pParent /*=NULL*/)
@@ -90,9 +90,9 @@ void Cmfc_OpenGL_OpenCLDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_RUNTIMESTATUS_EDIT, m_StatusEdt);
 	//  DDX_Control(pDX, IDC_COMBO1, m_DimChoose);
 	DDX_Control(pDX, IDC_DIMCHOOSE_COMBO, m_DimChooseComBox);
-	DDX_Control(pDX, IDC_DIMX_EDIT, m_DimXEdt);
-	DDX_Control(pDX, IDC_DIMY_EDIT, m_DimYEdt);
-	DDX_Control(pDX, IDC_DIMZ_EDIT, m_DimZEdt);
+	DDX_Control(pDX, IDC_DIMGX_EDIT, m_DimGXEdt);
+	DDX_Control(pDX, IDC_DIMGY_EDIT, m_DimGYEdt);
+	DDX_Control(pDX, IDC_DIMGZ_EDIT, m_DimGZEdt);
 	DDX_Control(pDX, IDC_REFLECTCOUNT_EDIT, m_ReflectCount);
 	DDX_Control(pDX, IDC_VIEWX_EDIT, m_ViewXEdt);
 	//  DDX_Control(pDX, IDC_VIEWY_EDIT, m_ViewY);
@@ -101,6 +101,9 @@ void Cmfc_OpenGL_OpenCLDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIGHTX_EDIT, m_LightXEdt);
 	DDX_Control(pDX, IDC_LIGHTY_EDIT, m_LightYEdt);
 	DDX_Control(pDX, IDC_LIGHTZ_EDIT, m_LightZEdt);
+	DDX_Control(pDX, IDC_DIMLX_EDIT, m_DimLXEdt);
+	DDX_Control(pDX, IDC_DIMLY_EDIT2, m_DimLYEdt);
+	DDX_Control(pDX, IDC_DIMLZ_EDIT2, m_DimLZEdt);
 }
 
 BEGIN_MESSAGE_MAP(Cmfc_OpenGL_OpenCLDlg, CDialogEx)
@@ -163,7 +166,10 @@ BOOL Cmfc_OpenGL_OpenCLDlg::OnInitDialog()
 	/*CRect rect(0, 100, 200, 300);
 	m_Render = new CRender;
 	m_Render->Create(NULL, NULL, WS_CHILDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE, rect, this, 0);*/
-	m_RenderDlg = new CRenderDlg;
+	if (!m_RenderDlg)
+	{
+		m_RenderDlg = new CRenderDlg;
+	}
 	m_RenderDlg->GetInstance()->DoModal();
 	m_Render = m_RenderDlg->GetInstance()->GetRenderObj();
 
@@ -212,10 +218,12 @@ BOOL Cmfc_OpenGL_OpenCLDlg::OnInitDialog()
 
 	//参数设置区相关
 	m_SelDimNum = 0;
-	m_DimXEdt.EnableWindow(FALSE);
-	m_DimYEdt.EnableWindow(FALSE);
-	m_DimZEdt.EnableWindow(FALSE);
-
+	m_DimGXEdt.EnableWindow(FALSE);
+	m_DimGYEdt.EnableWindow(FALSE);
+	m_DimGZEdt.EnableWindow(FALSE);
+	m_DimLXEdt.EnableWindow(FALSE);
+	m_DimLYEdt.EnableWindow(FALSE);
+	m_DimLZEdt.EnableWindow(FALSE);
 	((CButton*)GetDlgItem(IDC_COMMONSPLIT_RADIO))->SetCheck(TRUE);
 	m_SelRadio = SAHSPLIT_COMM;
 	
@@ -388,6 +396,7 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedGetModeLinfoButton()
 void Cmfc_OpenGL_OpenCLDlg::OnBnClickedInitialContextButton()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	m_Render->SetDC();
 	m_Render->InitContext();
 }
 
@@ -478,23 +487,32 @@ void Cmfc_OpenGL_OpenCLDlg::OnCbnSelchangeDimChooseCombo()
 	switch (index+1)
 	{
 	case 1:
-		m_DimXEdt.EnableWindow(TRUE);
-		m_DimYEdt.EnableWindow(FALSE);
-		m_DimZEdt.EnableWindow(FALSE);
+		m_DimGXEdt.EnableWindow(TRUE);
+		m_DimGYEdt.EnableWindow(FALSE);
+		m_DimGZEdt.EnableWindow(FALSE);
+		m_DimLXEdt.EnableWindow(TRUE);
+		m_DimLYEdt.EnableWindow(FALSE);
+		m_DimLZEdt.EnableWindow(FALSE);
 		systemLog->PrintStatus(_T("设置NDRange维度为1！"));
 		m_SelDimNum = 1;
 		break;
 	case 2:
-		m_DimXEdt.EnableWindow(TRUE);
-		m_DimYEdt.EnableWindow(TRUE);
-		m_DimZEdt.EnableWindow(FALSE);
+		m_DimGXEdt.EnableWindow(TRUE);
+		m_DimGYEdt.EnableWindow(TRUE);
+		m_DimGZEdt.EnableWindow(FALSE);
+		m_DimLXEdt.EnableWindow(TRUE);
+		m_DimLYEdt.EnableWindow(TRUE);
+		m_DimLZEdt.EnableWindow(FALSE);
 		systemLog->PrintStatus(_T("设置NDRange维度为2！"));
 		m_SelDimNum = 2;
 		break;
 	case 3:
-		m_DimXEdt.EnableWindow(TRUE);
-		m_DimYEdt.EnableWindow(TRUE);
-		m_DimZEdt.EnableWindow(TRUE);
+		m_DimGXEdt.EnableWindow(TRUE);
+		m_DimGYEdt.EnableWindow(TRUE);
+		m_DimGZEdt.EnableWindow(TRUE);
+		m_DimLXEdt.EnableWindow(TRUE);
+		m_DimLYEdt.EnableWindow(TRUE);
+		m_DimLZEdt.EnableWindow(TRUE);
 		systemLog->PrintStatus(_T("设置NDRange维度为3！"));
 		m_SelDimNum = 3;
 		break;
@@ -520,13 +538,13 @@ CString Cmfc_OpenGL_OpenCLDlg::GetEdtContent(CEdit* edit, wchar_t* info)
 	return CString(res, len);
 }
 
-BOOL Cmfc_OpenGL_OpenCLDlg::CheckDimEdt(CEdit* edt, wchar_t* dimName, int index)
+BOOL Cmfc_OpenGL_OpenCLDlg::CheckDimEdt(CEdit* edt, wchar_t* dimName, int index, bool flag )
 {
-	CString dimX;
+	CString dimInfo;
 	wchar_t* dim = new wchar_t[edt->LineLength()];
-	m_DimXEdt.GetLine(0, dim, edt->LineLength());
-	dimX = CString(dim, edt->LineLength());
-	if (dimX.GetLength()<=0)
+	edt->GetLine(0, dim, edt->LineLength());
+	dimInfo = CString(dim, edt->LineLength());
+	if (dimInfo.GetLength()<=0)
 	{
 		CString info = _T("Error:") + CString(dimName) + _T("维度设置出错！");
 		MessageBox(info.GetBuffer());
@@ -535,8 +553,8 @@ BOOL Cmfc_OpenGL_OpenCLDlg::CheckDimEdt(CEdit* edt, wchar_t* dimName, int index)
 		return FALSE;
 	}
 	delete[] dim;
-	float fDimX = StrToFloat(CStrToStr(dimX));
-	if (fDimX>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimX<=0)
+	float fDimInfo = StrToFloat(CStrToStr(dimInfo));
+	if (fDimInfo>m_HardwareInfo->platformInfo[m_SelPlatformIndex].deviceInfo[m_SelDeviceIndex].maxWorkItemSize[0] || fDimInfo<=0)
 	{
 		CString info;
 		info = _T("Error:") + CString(dimName) + _T("维度设置出错！");
@@ -545,9 +563,11 @@ BOOL Cmfc_OpenGL_OpenCLDlg::CheckDimEdt(CEdit* edt, wchar_t* dimName, int index)
 		systemLog->PrintStatus(info.GetBuffer());
 		return FALSE;
 	}
-	CString info = _T("设置") + CString(dimName) + _T("维度的工作组为--") + dimX;
+	CString info = _T("设置") + CString(dimName) + _T("维度的工作组为--") + dimInfo;
 	systemLog->PrintStatus(info.GetBuffer());
-	m_WorkGroup[index] = fDimX;
+	if ( flag ) m_WorkGlobalGroup[index] = fDimInfo;
+	else	m_WorkLocalGroup[index] = fDimInfo;
+
 	return TRUE;
 
 }
@@ -556,13 +576,20 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedConfigConfirmButton()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	//NDRange参数查错
-	m_WorkGroup.resize(m_SelDimNum);
-	
+	m_WorkGlobalGroup.resize(m_SelDimNum);
+	m_WorkLocalGroup.resize(m_SelDimNum);
 
 	switch(m_SelDimNum)
 	{
 	case 1:
-		if(!CheckDimEdt(&m_DimXEdt, _T("X"), 0)) 
+		if(!CheckDimEdt(&m_DimGXEdt, _T("GX"), 0)) 
+		{
+			MessageBox(_T("Error:参数初始化失败！"));
+			systemLog->PrintStatus(_T("Error:	参数初始化失败！"));
+			return;
+		}
+
+		if (!CheckDimEdt(&m_DimLXEdt, _T("GX"), 0, false))
 		{
 			MessageBox(_T("Error:参数初始化失败！"));
 			systemLog->PrintStatus(_T("Error:	参数初始化失败！"));
@@ -571,9 +598,11 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedConfigConfirmButton()
 		break;
 	case 2:
 		{
-			auto flagX = CheckDimEdt(&m_DimXEdt, _T("X"), 0);
-			auto flagY = CheckDimEdt(&m_DimYEdt, _T("Y"), 1);
-			if( !flagX || !flagY )
+			auto flagGX = CheckDimEdt(&m_DimGXEdt, _T("GX"), 0);
+			auto flagGY = CheckDimEdt(&m_DimGYEdt, _T("GY"), 1);
+			auto flagLX = CheckDimEdt(&m_DimLXEdt, _T("LX"), 0, false);
+			auto flagLY = CheckDimEdt(&m_DimLYEdt, _T("LY"), 1, false);
+			if( !flagGX || !flagGY || !flagLX || !flagLY)
 			{
 				MessageBox(_T("Error:参数初始化失败！"));
 				systemLog->PrintStatus(_T("Error:	参数初始化失败！"));
@@ -583,10 +612,13 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedConfigConfirmButton()
 		break;
 	case 3:
 		{
-			auto flagX = CheckDimEdt(&m_DimXEdt, _T("X"), 0);
-			auto flagY = CheckDimEdt(&m_DimYEdt, _T("Y"), 1);
-			auto flagZ = CheckDimEdt(&m_DimZEdt, _T("Z"), 2);
-			if ( !flagX || !flagY || !flagZ)
+			auto flagGX = CheckDimEdt(&m_DimGXEdt, _T("GX"), 0);
+			auto flagGY = CheckDimEdt(&m_DimGYEdt, _T("GY"), 1);
+			auto flagGZ = CheckDimEdt(&m_DimGZEdt, _T("GZ"), 2);
+			auto flagLX = CheckDimEdt(&m_DimLXEdt, _T("LX"), 0, false);
+			auto flagLY = CheckDimEdt(&m_DimLYEdt, _T("LY"), 1, false);
+			auto flagLZ = CheckDimEdt(&m_DimLZEdt, _T("LZ"), 2, false);
+			if ( !flagGX || !flagGY || !flagGZ || !flagLX || !flagLY || !flagLZ)
 			{
 				MessageBox(_T("Error:参数初始化失败！"));
 				systemLog->PrintStatus(_T("Error:	参数初始化失败！"));
@@ -604,7 +636,7 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedConfigConfirmButton()
 		systemLog->PrintStatus(_T("Error:	工作组和工作项维度设置错误！"));
 		return;
 	}
-	m_Render->GetCompObj()->SetNDRange( m_WorkGroup, m_SelDimNum);
+	m_Render->GetCompObj()->SetNDRange( m_WorkGlobalGroup, m_SelDimNum);
 	systemLog->PrintStatus(_T("设备工作组和工作项设置成功！——NDRange设置成功！\r\n"));
 
 	//设置SAHSplit方法
@@ -680,7 +712,8 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedOffLineRenderingButton()
 	// TODO: 在此添加控件通知处理程序代码
 	m_Render->GetCompObj()->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
 	m_Render->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
-	m_Render->GetCompObj()->OffLineRendering();
+	if(!m_Render->GetCompObj()->OffLineRendering()) return;
+	m_RenderDlg->DoModal();
 }
 
 
@@ -689,7 +722,8 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedRealtimeRenderingButton()
 	// TODO: 在此添加控件通知处理程序代码
 	m_Render->GetCompObj()->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
 	m_Render->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
-	m_Render->GetCompObj()->RealTimeRendering();
+	if(!m_Render->GetCompObj()->RealTimeRendering()) return;
+	m_RenderDlg->DoModal();
 }
 
 CRenderDlg* Cmfc_OpenGL_OpenCLDlg::GetRenderDlg()

@@ -7,16 +7,23 @@
 #include <sstream>
 #include <fstream>
 
+#include <gl/glew.h>
+#include <gl/glu.h>
 
 #include <CL/cl.h>
 #include <cl/cl_gl.h>
+
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <common/objloader.hpp>
+#include <common/shader.hpp>
 
 #include "afx.h"
+
+const int ciRenderWinWidth = 1024;
+const int ciRenderWinHeight = 768;
 
 enum {
 	SAHSPLIT_COMM	=	0x2000000,
@@ -24,6 +31,25 @@ enum {
 	SAHSPLIT_PSO	=	0x2000002,
 };
 
+static const GLfloat cfQuadVertBuffer[] = 
+{
+	-1.0f, -1.0f, 0.0f,
+	1.0f, -1.0f, 0.0f,
+	-1.0f,  1.0f, 0.0f,
+	-1.0f,  1.0f, 0.0f,
+	1.0f, -1.0f, 0.0f,
+	1.0f,  1.0f, 0.0f,
+};
+
+static const GLfloat UV[] = 
+{ 
+	0.0f, 0.0f, 
+	1.0f, 0.0f, 
+	0.0f,  1.0f, 
+	0.0f,  1.0f, 
+	1.0f, 0.0f, 
+	1.0f,  1.0f, 
+};
 
 struct DeviceInfo
 {

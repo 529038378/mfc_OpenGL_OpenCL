@@ -27,6 +27,7 @@ BOOL CheckError(cl_int status, wchar_t* wchr)
 	if ( status != CL_SUCCESS)
 	{
 		str += _T("--Ê§°Ü£¡£¡£¡");
+		str = _T("Error:	") + str;
 		systemLog->PrintStatus(str.GetBuffer());
 		return FALSE;
 	}

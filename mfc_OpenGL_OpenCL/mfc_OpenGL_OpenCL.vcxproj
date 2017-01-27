@@ -108,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\OpenGLLib\include\common\objloader.hpp" />
+    <ClInclude Include="..\..\..\OpenGLLib\include\common\shader.hpp" />
     <ClInclude Include="cusLib.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="mfc_OpenGL_OpenCL.h" />
@@ -120,6 +121,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\OpenGLLib\include\common\objloader.cpp" />
+    <ClCompile Include="..\..\..\OpenGLLib\include\common\shader.cpp" />
     <ClCompile Include="cusLib.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="mfc_OpenGL_OpenCL.cpp" />

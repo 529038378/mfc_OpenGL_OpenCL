@@ -16,6 +16,10 @@ CRenderDlg::CRenderDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CRenderDlg::IDD, pParent)
 {
 	m_instance = this;
+	if (!m_Render)
+	{
+		m_Render = new CRender;
+	}
 }
 
 CRenderDlg::~CRenderDlg()
@@ -30,7 +34,7 @@ void CRenderDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CRenderDlg, CDialogEx)
-	ON_BN_CLICKED(IDC_RENDERDISPLAY_BUTTON, &CRenderDlg::OnBnClickedRenderDisplayButton)
+	//ON_BN_CLICKED(IDC_RENDERDISPLAY_BUTTON, &CRenderDlg::OnBnClickedRenderDisplayButton)
 END_MESSAGE_MAP()
 
 
@@ -49,10 +53,7 @@ BOOL CRenderDlg::OnInitDialog()
 	//ÉèÖÃäÖÈ¾ÇøÓò
 	CRect dlgRect;
 	GetClientRect(&dlgRect);
-	if (!m_Render)
-	{
-		m_Render = new CRender;
-	}
+	
 	m_Render->Create(NULL, NULL, WS_CHILDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE, dlgRect, this, 0);
 
 	static int flag = 1;
@@ -76,13 +77,13 @@ HWND CRenderDlg::GetHandle()
 	return GetSafeHwnd();
 }
 
-void CRenderDlg::Display()
-{
-	HWND hwnd = this->m_hWnd;
-	Invalidate(TRUE);
-	UpdateWindow();
-	DoModal();
-}
+//void CRenderDlg::Display()
+//{
+//	HWND hwnd = this->m_hWnd;
+//	Invalidate(TRUE);
+//	UpdateWindow();
+//	DoModal();
+//}
 
 void CRenderDlg::OnBnClickedRenderDisplayButton()
 {

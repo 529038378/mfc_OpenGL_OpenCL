@@ -74,43 +74,6 @@ int CRender::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	SetDC();
-	//初始化渲染环境各参数
-	glGenTextures(1, &m_RenderTexture);
-	glBindTexture(GL_TEXTURE_2D, m_RenderTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ciRenderWinWidth, ciRenderWinHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ciRenderWinWidth, ciRenderWinHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-	glBindTexture(0, m_RenderTexture);
-
-
-
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_RenderTexture, 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glGenBuffers(1, &m_VertArrayID);
-	glBindVertexArray(m_VertArrayID);
-
-	glGenBuffers(1, &m_QuadVert);
-	glBindBuffer(GL_ARRAY_BUFFER, m_QuadVert);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cfQuadVertBuffer), cfQuadVertBuffer, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &m_PBO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_PBO);
-	glBufferData(GL_ARRAY_BUFFER, ciRenderWinWidth*ciRenderWinHeight*sizeof(unsigned char), 0, GL_STREAM_DRAW);
-
-	glGenBuffers(1, &m_UV);
-	glBindBuffer(GL_ARRAY_BUFFER, m_UV);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(UV), UV, GL_STATIC_DRAW);
-	m_Program = LoadShaders("vert.vs","frag.fs");
-	m_TexID = glGetUniformLocation(m_Program, "renderedTexture");
-	glClearColor(153.0f, 51.0f, 250.0f, 0.0f);
-
-	SetPBO();
-
 	return 0;
 }
 
@@ -121,9 +84,7 @@ void CRender::OnPaint()
 	// TODO: 在此处添加消息处理程序代码
 	// 不为绘图消息调用 CWnd::OnPaint()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	RenderScene();
-	glFlush();
 	SwapBuffers(m_HDC);
 }
 
@@ -192,10 +153,53 @@ void CRender::RenderScene()
 	glVertex2f(-0.5f, -0.3f);
 	glVertex2f(0.4f, 0.6f);
 	glEnd();*/
+	//初始化渲染环境各参数
+	GetCompObj()->InitContext();
+	glGenTextures(1, &m_RenderTexture);
+	glBindTexture(GL_TEXTURE_2D, m_RenderTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ciRenderWinWidth, ciRenderWinHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ciRenderWinWidth, ciRenderWinHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glBindTexture(0, m_RenderTexture);
+
+	glGenFramebuffers(1, &m_FrameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBuffer);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_RenderTexture, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glGenBuffers(1, &m_VertArrayID);
+	glBindVertexArray(m_VertArrayID);
+
+	glGenBuffers(1, &m_QuadVert);
+	glBindBuffer(GL_ARRAY_BUFFER, m_QuadVert);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cfQuadVertBuffer), cfQuadVertBuffer, GL_STATIC_DRAW);
+
+
+	std::vector<unsigned char> color(4*ciRenderWinWidth*ciRenderWinHeight);
+	
+	glGenBuffers(1, &m_PBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_PBO);
+	glBufferData(GL_ARRAY_BUFFER, ciRenderWinHeight*ciRenderWinWidth*4*sizeof(unsigned char), 0, GL_STREAM_DRAW);
+
+	GetCompObj()->SetPBO(m_PBO);
+	GetCompObj()->OffLineRendering();
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_PBO);
 	glBindTexture(GL_TEXTURE_2D, m_RenderTexture);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, ciRenderWinWidth, ciRenderWinHeight, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glGenBuffers(1, &m_UV);
+	glBindBuffer(GL_ARRAY_BUFFER, m_UV);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(UV), UV, GL_STATIC_DRAW);
+	m_Program = LoadShaders("vert.vs","frag.fs");
+	m_TexID = glGetUniformLocation(m_Program, "renderedTexture");
+	glClearColor(153.0f, 51.0f, 250.0f, 0.0f);
+
+	
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, ciRenderWinWidth, ciRenderWinHeight);
@@ -265,4 +269,9 @@ void CRender::SetSelHardware(int platformIndex /* = 0 */, int deviceIndex /* = 0
 void CRender::SetRenderDlg(CDialog* dlg)
 {
 	m_RenderDlg = dlg;
+}
+
+ModelInfo* CRender::GetModelInfo()
+{
+	return m_ModelInfo;
 }

@@ -114,9 +114,11 @@
     <ClInclude Include="mfc_OpenGL_OpenCL.h" />
     <ClInclude Include="mfc_OpenGL_OpenCLDlg.h" />
     <ClInclude Include="PrallalCompute.h" />
+    <ClInclude Include="PSOParamDlg.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="RenderDlg.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="SAAParamDlg.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
@@ -127,8 +129,10 @@
     <ClCompile Include="mfc_OpenGL_OpenCL.cpp" />
     <ClCompile Include="mfc_OpenGL_OpenCLDlg.cpp" />
     <ClCompile Include="PrallalCompute.cpp" />
+    <ClCompile Include="PSOParamDlg.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="RenderDlg.cpp" />
+    <ClCompile Include="SAAParamDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

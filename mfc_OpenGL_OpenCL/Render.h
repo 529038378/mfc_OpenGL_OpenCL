@@ -29,6 +29,7 @@ public:
 	void	SetRenderDlg(CDialog* dlg);
 	void	SetPBO();
 	void	SetDC();
+	ModelInfo*	GetModelInfo();
 private:
 	HDC		m_HDC;
 	HGLRC	m_HGLRC;
@@ -43,6 +44,7 @@ private:
 	GLuint			m_UV;
 	GLuint			m_Program;
 	GLuint			m_TexID;
+	GLuint			m_FrameBuffer;
 };
 
 

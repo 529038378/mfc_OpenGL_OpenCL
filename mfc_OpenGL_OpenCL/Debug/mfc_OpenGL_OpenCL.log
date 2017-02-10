@@ -1,4 +1,4 @@
-﻿生成启动时间为 2017/1/27 21:50:04。
+﻿生成启动时间为 2017/2/10 23:35:17。
      1>项目“D:\learning\Graduation_design\mfc_OpenGL_OpenCL\mfc_OpenGL_OpenCL\mfc_OpenGL_OpenCL.vcxproj”在节点 2 上(build 个目标)。
      1>InitializeBuildStatus:
          正在创建“Debug\mfc_OpenGL_OpenCL.unsuccessfulbuild”，因为已指定“AlwaysCreate”。
@@ -6,17 +6,40 @@
          所有输出均为最新。
          D:\software\VS2010\VC\bin\CL.exe /c /I"D:\software\OpenCL\OpenCL SDK\6.3\include" /ID:\learning\OpenGLLib\include /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _UNICODE /D UNICODE /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt PrallalCompute.cpp
          PrallalCompute.cpp
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(199): warning C4244: “=”: 从“std::streamoff”转换到“size_t”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(233): warning C4996: 'clCreateCommandQueue': 被声明为已否决
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(192): warning C4244: “=”: 从“std::streamoff”转换到“size_t”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(229): warning C4996: 'clCreateCommandQueue': 被声明为已否决
                  d:\software\opencl\opencl sdk\6.3\include\cl\cl.h(1428) : 参见“clCreateCommandQueue”的声明
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(287): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(288): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(289): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
      1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(291): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
      1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(292): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
      1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(293): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(295): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(296): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(297): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(306): warning C4101: “iStatus”: 未引用的局部变量
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(334): warning C4101: “iStatus”: 未引用的局部变量
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(472): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(473): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(493): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(509): warning C4244: “参数”: 从“float”转换到“unsigned int”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(510): warning C4018: “<”: 有符号/无符号不匹配
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(512): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(521): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(522): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(654): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(654): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(654): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(654): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(660): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(661): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(668): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(668): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(668): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(668): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(668): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(674): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(675): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
        ResourceCompile:
-         所有输出均为最新。
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /D _DEBUG /D _UNICODE /D UNICODE /D _AFXDLL /l"0x0804" /IDebug\ /nologo /fo"Debug\mfc_OpenGL_OpenCL.res" mfc_OpenGL_OpenCL.rc 
        ManifestResourceCompile:
          所有输出均为最新。
        Link:
@@ -29,8 +52,10 @@
          Debug\mfc_OpenGL_OpenCL.obj
          Debug\mfc_OpenGL_OpenCLDlg.obj
          Debug\PrallalCompute.obj
+         Debug\PSOParamDlg.obj
          Debug\Render.obj
          Debug\RenderDlg.obj
+         Debug\SAAParamDlg.obj
          Debug\stdafx.obj
        Manifest:
          C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"Debug\mfc_OpenGL_OpenCL.exe.embed.manifest" /manifest Debug\mfc_OpenGL_OpenCL.exe.intermediate.manifest D:\software\VS2010\VC\Include\Manifest\dpiaware.manifest
@@ -45,4 +70,4 @@
 
 生成成功。
 
-已用时间 00:00:04.91
+已用时间 00:00:06.43

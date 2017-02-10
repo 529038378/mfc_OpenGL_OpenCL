@@ -24,7 +24,8 @@
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
 Cmfc_OpenGL_OpenCLDlg* Cmfc_OpenGL_OpenCLDlg::m_instance = NULL;
-
+extern std::vector<size_t> pixelGlobalGroup;
+extern std::vector<size_t> pixelLocalGroup;
 
 
 class CAboutDlg : public CDialogEx
@@ -170,7 +171,7 @@ BOOL Cmfc_OpenGL_OpenCLDlg::OnInitDialog()
 	{
 		m_RenderDlg = new CRenderDlg;
 	}
-	m_RenderDlg->GetInstance()->DoModal();
+	//m_RenderDlg->GetInstance()->DoModal();
 	m_Render = m_RenderDlg->GetInstance()->GetRenderObj();
 
 	//硬件信息显示CTreeCtrl和硬件选择ComboBox相关
@@ -216,6 +217,20 @@ BOOL Cmfc_OpenGL_OpenCLDlg::OnInitDialog()
 	m_hardwareInfoTreeCtl.GetClientRect(&treeClientRect);
 	m_toolTip.AddTool(GetDlgItem(IDC_HARDWAREINFO_Tree), _T("本机硬件信息"), &treeClientRect, IDC_HARDWAREINFO_Tree);
 
+	//遍历硬件树并展开
+	m_hardwareInfoTreeCtl.Expand(m_root, TVE_EXPAND);
+	HTREEITEM childNode = m_hardwareInfoTreeCtl.GetChildItem(m_root);
+	while (childNode)
+	{
+		m_hardwareInfoTreeCtl.Expand(childNode, TVE_EXPAND);
+		HTREEITEM grandChildNode = m_hardwareInfoTreeCtl.GetChildItem(childNode);
+		while (grandChildNode)
+		{
+			m_hardwareInfoTreeCtl.Expand(grandChildNode, TVE_EXPAND);
+			grandChildNode = m_hardwareInfoTreeCtl.GetNextItem(grandChildNode, TVGN_NEXT);
+		}
+		childNode = m_hardwareInfoTreeCtl.GetNextItem(childNode, TVGN_NEXT);
+	}
 	//参数设置区相关
 	m_SelDimNum = 0;
 	m_DimGXEdt.EnableWindow(FALSE);
@@ -226,7 +241,17 @@ BOOL Cmfc_OpenGL_OpenCLDlg::OnInitDialog()
 	m_DimLZEdt.EnableWindow(FALSE);
 	((CButton*)GetDlgItem(IDC_COMMONSPLIT_RADIO))->SetCheck(TRUE);
 	m_SelRadio = SAHSPLIT_COMM;
-	
+
+	//设置工作组大小相关参数
+	pixelGlobalGroup.resize(2);
+	pixelLocalGroup.resize(2);
+	pixelGlobalGroup[0] = ciRenderWinWidth;
+	pixelGlobalGroup[1] = ciRenderWinHeight;
+	/*pixelLocalGroup[0] = ciRenderWinWidth / 4;
+	pixelLocalGroup[1] = ciRenderWinHeight / 4;
+*/
+	pixelLocalGroup[0] = 16;
+	pixelLocalGroup[1] = 16;
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -383,6 +408,7 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedGetModeLinfoButton()
 	if (m_Render->LoadObjInfo(m_ModelName))
 	{
 		//MessageBox(_T("模型数据读取完毕！"));
+		SetModelInfo();
 		systemLog->PrintStatus(_T("模型数据读取完成！\r\n"));
 	}
 	else
@@ -579,7 +605,7 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedConfigConfirmButton()
 	m_WorkGlobalGroup.resize(m_SelDimNum);
 	m_WorkLocalGroup.resize(m_SelDimNum);
 
-	switch(m_SelDimNum)
+	/*switch(m_SelDimNum)
 	{
 	case 1:
 		if(!CheckDimEdt(&m_DimGXEdt, _T("GX"), 0)) 
@@ -637,7 +663,7 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedConfigConfirmButton()
 		return;
 	}
 	m_Render->GetCompObj()->SetNDRange( m_WorkGlobalGroup, m_WorkLocalGroup, m_SelDimNum);
-	systemLog->PrintStatus(_T("设备工作组和工作项设置成功！——NDRange设置成功！\r\n"));
+	systemLog->PrintStatus(_T("设备工作组和工作项设置成功！——NDRange设置成功！\r\n"));*/
 
 	//设置SAHSplit方法
 	m_Render->GetCompObj()->SetSAHSplitMethod(m_SelRadio);
@@ -695,6 +721,9 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedSAASAHSplitRadio()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	m_SelRadio = SAHSPLIT_SAA;
+	m_SAAParamDlg = new CSAAParamDlg;
+	m_SAAParamDlg->SetOpenCLComPtr(m_Render->GetCompObj());
+	m_SAAParamDlg->DoModal();
 }
 
 
@@ -704,6 +733,9 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedPSOSAHSplitRadio()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	m_SelRadio = SAHSPLIT_PSO;
+	m_PSOParamDlg = new CPSOParamDlg;
+	m_PSOParamDlg->SetOpenCLComPtr(m_Render->GetCompObj());
+	m_PSOParamDlg->DoModal();
 }
 
 
@@ -712,7 +744,7 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedOffLineRenderingButton()
 	// TODO: 在此添加控件通知处理程序代码
 	m_Render->GetCompObj()->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
 	m_Render->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
-	if(!m_Render->GetCompObj()->OffLineRendering()) return;
+	//if(!m_Render->GetCompObj()->OffLineRendering()) return;
 	m_RenderDlg->DoModal();
 }
 
@@ -722,11 +754,21 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedRealtimeRenderingButton()
 	// TODO: 在此添加控件通知处理程序代码
 	m_Render->GetCompObj()->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
 	m_Render->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
-	if(!m_Render->GetCompObj()->RealTimeRendering()) return;
+	//if(!m_Render->GetCompObj()->RealTimeRendering()) return;
 	m_RenderDlg->DoModal();
 }
 
 CRenderDlg* Cmfc_OpenGL_OpenCLDlg::GetRenderDlg()
 {
 	return m_RenderDlg;
+}
+
+void Cmfc_OpenGL_OpenCLDlg::SetModelInfo()
+{
+	m_Render->GetCompObj()->SetModelInfo(m_Render->GetModelInfo());
+}
+
+ConfigInfo* Cmfc_OpenGL_OpenCLDlg::GetConfigInfo()
+{
+	return m_Render->GetCompObj()->GetConfigInfo();
 }

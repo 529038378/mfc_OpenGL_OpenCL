@@ -3,6 +3,9 @@
 #include "Log.h"
 
 COpenCLCompute* COpenCLCompute::m_instance = NULL;
+extern std::vector<size_t> pixelGlobalGroup;
+extern std::vector<size_t> pixelLocalGroup;
+
 COpenCLCompute::COpenCLCompute()
 {
 	m_HardwareInfo = new HardwareInfo;
@@ -11,6 +14,8 @@ COpenCLCompute::COpenCLCompute()
 	m_GLCLShared = true;
 	m_ConfigInfo->viewPos.resize(3);
 	m_ConfigInfo->lightPos.resize(3);
+	m_ConfigInfo->SAHType = SAHSPLIT_COMM;
+	m_ConfigInfo->maxKDTreeDepth = 20;
 	m_ContextReady = false;
 	m_ParamReady = false;
 
@@ -164,10 +169,9 @@ DeviceInfo COpenCLCompute::GetDeviceInfo(std::vector<cl_device_id>::iterator& it
 void COpenCLCompute::InitContext()
 {
 	//设置context
+	
 	cl_int iStatus;
-	if (m_GLCLShared)
-	{
-		cl_context_properties clProp[]= {
+	cl_context_properties clProp[]= {
 		CL_GL_CONTEXT_KHR,
 		(cl_context_properties)m_HGLRC,
 		CL_WGL_HDC_KHR,
@@ -175,20 +179,9 @@ void COpenCLCompute::InitContext()
 		CL_CONTEXT_PLATFORM,
 		(cl_context_properties)m_HardwareInfo->platformIDs[m_ConfigInfo->selPlaformIndex],
 		0
-		};
-		m_Context = clCreateContext(clProp, 1, &m_HardwareInfo->platformInfo[m_ConfigInfo->selPlaformIndex].deviceIDs[m_ConfigInfo->selDeviceIndex], NULL, NULL, &iStatus);
-		if(!CheckError(iStatus, _T("建立OpenGL-OpenCL共享context"))) return;
-	}
-	else
-	{
-		cl_context_properties clProp[] = {
-			CL_CONTEXT_PLATFORM,
-			(cl_context_properties)m_HardwareInfo->platformIDs[m_ConfigInfo->selPlaformIndex],
-			0
-		};
-		m_Context = clCreateContext(clProp, 1, &m_HardwareInfo->platformInfo[m_ConfigInfo->selPlaformIndex].deviceIDs[m_ConfigInfo->selDeviceIndex], NULL, NULL, &iStatus);
-		if(!CheckError(iStatus, _T("建立context"))) return;
-	}
+	};
+	m_Context = clCreateContext(clProp, 1, &m_HardwareInfo->platformInfo[m_ConfigInfo->selPlaformIndex].deviceIDs[m_ConfigInfo->selDeviceIndex], NULL, NULL, &iStatus);
+	if(!CheckError(iStatus, _T("建立OpenGL-OpenCL共享context"))) return;
 
 	//读取kernel文件
 	std::ifstream ifFile("kernel.cl", std::ios_base::binary);
@@ -230,11 +223,14 @@ void COpenCLCompute::InitContext()
 	m_RayTraceKernel = clCreateKernel(m_Program, "RayTrace", &iStatus);
 	if (!CheckError(iStatus, _T("获取RayTraceKernel"))) return;
 	
-	m_Queue = clCreateCommandQueue(m_Context, m_HardwareInfo->platformInfo[m_ConfigInfo->selPlaformIndex].deviceIDs[m_ConfigInfo->selDeviceIndex], NULL, &iStatus);
+	//默认设置
+	m_SAHSplitKernel = m_CommSAHSplitKernel;
+
+	m_Queue = clCreateCommandQueue(m_Context, m_HardwareInfo->platformInfo[m_ConfigInfo->selPlaformIndex].deviceIDs[m_ConfigInfo->selDeviceIndex], CL_QUEUE_PROFILING_ENABLE, &iStatus);
 	if (!CheckError(iStatus, _T("创建设备命令队列"))) return;
 
 
-	systemLog->PrintStatus(_T("运算环境初始化——成功！\r\n"));
+	systemLog->PrintStatus(_T("\r\n运算环境初始化——成功！\r\n"));
 	m_ContextReady = true;
 }
 
@@ -321,23 +317,14 @@ BOOL COpenCLCompute::OffLineRendering()
 		return FALSE;
 	}
 
-	//计算PBO_Mem
-	m_PBOMem = clCreateFromGLBuffer(m_Context, CL_MEM_WRITE_ONLY, m_PBO, &iStatus);
-	if(!CheckError(iStatus, _T("建立PBO"))) return FALSE;
-	
-	clSetKernelArg(m_SAHSplitKernel, 0, sizeof(cl_mem), &m_PBOMem);
-	
-	glFinish();
-	iStatus = clEnqueueAcquireGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
-	CheckError(iStatus, _T("获取GL环境下的PBO控制权"));
-	iStatus = clEnqueueNDRangeKernel(m_Queue, m_RayTraceKernel, m_ConfigInfo->workGlobalGroup.size(), NULL, &m_ConfigInfo->workGlobalGroup[0], &m_ConfigInfo->workLocalGroup[0], 0, 0, 0);
-	CheckError(iStatus, _T("计算PBO"));
-	clFinish(m_Queue);
-	iStatus = clEnqueueReleaseGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
-	CheckError(iStatus, _T("释放CL环境下的PBO控制权"));
+	m_DrawInfo = new DrawableInfo;
+	m_DrawInfo = getTriangles(&m_ModleInfo->verts[0], &m_ModleInfo->normals[0], m_ModleInfo->verts.size());
 
-	std::vector<unsigned char> tmpData(ciRenderWinHeight*ciRenderWinWidth);
-	clEnqueueReadBuffer(m_Queue, m_PBOMem, CL_TRUE, 0, ciRenderWinHeight*ciRenderWinWidth*sizeof(unsigned char), &tmpData[0], 0, 0, 0);
+	m_RenderType = OFFLINE_RENDERING;
+	//BitonicSort();
+	//BuildKDTree();
+	CalPBO();
+
 	systemLog->PrintStatus(_T("离线渲染成功！"));
 	return TRUE;
 }
@@ -358,12 +345,10 @@ BOOL COpenCLCompute::RealTimeRendering()
 		return FALSE;
 	}
 
-	//计算PBO_Mem
-	m_PBOMem = clCreateFromGLBuffer(m_Context, CL_MEM_WRITE_ONLY, m_PBO, &iStatus);
-
-	if(!CheckError(iStatus, _T("建立PBO"))) return FALSE;
-
-	clSetKernelArg(m_SAHSplitKernel, 1, sizeof(cl_mem), &m_PBOMem);
+	m_RenderType = REALTIME_RENDERING;
+	BitonicSort();
+	//BuildKDTree();
+	CalPBO();
 
 	systemLog->PrintStatus(_T("实时渲染成功！"));
 	return TRUE;
@@ -383,4 +368,319 @@ void COpenCLCompute::SetDC(HDC& hdc, HGLRC& hglrc)
 {
 	m_HDC = hdc;
 	m_HGLRC = hglrc;
+}
+
+void COpenCLCompute::BitonicSort()
+{
+	cl_int iStatus;
+	DWORD dBegTime = GetTickCount();
+
+	int len = m_DrawInfo->triangleCandidateSplitPlaneArray.size();
+	m_InputInfo = m_DrawInfo->triangleCandidateSplitPlaneArray;
+	fillTo2PowerScale(m_InputInfo);
+
+	m_InputInfoMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_WRITE, sizeof(TriangleCandidateSplitPlane)*m_InputInfo.size(), &m_InputInfo[0], &iStatus);
+	CheckError(iStatus, _T("clCreateBuffer of InputInfoMem"));
+
+	int dir = 1;
+	cl_mem dirMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), &dir, &iStatus);
+	CheckError(iStatus, _T("clCreateBuffer of dirMem"));
+
+	clSetKernelArg(m_BitonicSortKernel, 0, sizeof(cl_mem), &m_InputInfoMem);
+	clSetKernelArg(m_BitonicSortKernel, 3, sizeof(cl_mem), &dirMem);
+
+	int ceil = m_InputInfo.size();
+	for (int i= 2; i<= ceil; i<<=1)
+	{
+		for (int j = i; j > 1; j>>=1)
+		{
+			int groupSize = ceil/j;
+			int flip = (j==i?1:-1);
+			const size_t global = 128;
+			const size_t local = 32;
+
+			cl_mem groupSizeMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), &groupSize, &iStatus);
+			cl_mem lengthMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), &j, &iStatus);
+			cl_mem flipMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), &flip, &iStatus);
+			clSetKernelArg(m_BitonicSortKernel, 1, sizeof(cl_mem), &groupSizeMem);
+			clSetKernelArg(m_BitonicSortKernel, 2, sizeof(cl_mem), &lengthMem);
+			clSetKernelArg(m_BitonicSortKernel, 4, sizeof(cl_mem), &flipMem);
+
+			iStatus = clEnqueueNDRangeKernel(m_Queue, m_BitonicSortKernel, 1, 0, &global, &local, 0, 0, 0);
+			//if (!CheckError(iStatus, _T("clEnqueueNDRangeKernel"))) return;
+			if ( CL_SUCCESS != iStatus) return;
+			clReleaseMemObject(groupSizeMem);
+			clReleaseMemObject(flipMem);
+			clReleaseMemObject(lengthMem);
+		}
+	}
+	CheckError(iStatus, _T("clEnqueueNDRangeKernel of BitonicSort"));
+	clFinish(m_Queue);
+
+	clReleaseMemObject(dirMem);
+	DWORD dEndTime = GetTickCount();
+	DWORD dSortTime = dEndTime - dBegTime;
+	auto sSortTime = TToStr(dSortTime);
+
+	//测试代码
+	std::vector<TriangleCandidateSplitPlane> test(m_InputInfo.size());
+	iStatus = clEnqueueReadBuffer(m_Queue, m_InputInfoMem, CL_TRUE, 0, m_InputInfo.size()*sizeof(TriangleCandidateSplitPlane), &test[0], 0, NULL, NULL);
+	CheckError(iStatus, _T("read buffer of inputInfoMem"));
+	clFinish(m_Queue);
+	CString info = _T("排序完成！	--花费时间:") + StrToCStr(sSortTime) + _T("(ms)");
+	systemLog->PrintStatus(info.GetBuffer());
+}
+
+void COpenCLCompute::BuildKDTree()
+{
+	cl_int iStatus;
+	DWORD dBegTime = GetTickCount();
+
+	clSetKernelArg(m_SAHSplitKernel, 0, sizeof(cl_mem), &m_InputInfoMem);
+	int maxSplitNodeArrayLength = GetNodeArrayMaxLength(m_InputInfo.size());
+	SplitNode originSplitNode;
+	InitialSplitNode(&originSplitNode);
+	std::vector<SplitNode> splitNodeArray(maxSplitNodeArrayLength, originSplitNode);
+	SplitNode firstSplitNode;
+	firstSplitNode.beg = 0;
+	firstSplitNode.end = m_DrawInfo->triangleInfoArray.size()-1;
+	firstSplitNode.leftChild = -1;
+	firstSplitNode.rightChild = -1;
+	firstSplitNode.xMax = m_InputInfo[0].xMax;
+	firstSplitNode.xMin = m_InputInfo[0].xMin;
+	firstSplitNode.yMax = m_InputInfo[0].yMax;
+	firstSplitNode.yMin = m_InputInfo[0].yMin;
+	firstSplitNode.zMax = m_InputInfo[0].zMax;
+	firstSplitNode.zMin = m_InputInfo[0].zMin;
+	splitNodeArray[0] = firstSplitNode;
+
+	cl_mem maxSizeMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), &maxSplitNodeArrayLength, &iStatus);
+	CheckError(iStatus, _T("create buffer of MaxSize"));
+	clSetKernelArg(m_SAHSplitKernel, 6, sizeof(cl_mem), &maxSizeMem);
+
+	if ( SAHSPLIT_COMM == m_ConfigInfo->SAHType )
+	{
+		m_SplitNodeArrayMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_WRITE, sizeof(SplitNode)*maxSplitNodeArrayLength, &splitNodeArray[0], &iStatus);
+		CheckError(iStatus, _T("create buffer of CommSplitNodeArrayMem"));
+
+		clSetKernelArg(m_SAHSplitKernel, 1, sizeof(cl_mem), &m_SplitNodeArrayMem);
+		clSetKernelArg(m_SAHSplitKernel, 4, sizeof(cl_mem), &maxSizeMem);
+
+		int depth = 0;
+		for (int i= 1; (i < log((float) maxSplitNodeArrayLength)/log(2.0)) && (depth < m_ConfigInfo->maxKDTreeDepth); i++)
+		{
+			int splitNodeArrayBeg = pow(2.0, i-1) - 1;
+			int splitNodeArrayEnd = pow(2.0, i) - 2;
+			size_t layerLength = splitNodeArrayEnd - splitNodeArrayBeg + 1;
+			const size_t globalSize = layerLength;
+			const size_t localSize = (globalSize <= 64)? globalSize : 64;
+			cl_mem splitNodeArrayBegMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), &splitNodeArrayBeg, &iStatus);
+			CheckError(iStatus, _T("create buffer of SplitNodeArrayBegMem"));
+			cl_mem splitNodeArrayEndMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), &splitNodeArrayEnd, &iStatus);
+			CheckError(iStatus, _T("create buffer of SplitNodeArrayEndMem"));
+			iStatus = clSetKernelArg(m_SAHSplitKernel, 2, sizeof(cl_mem), &splitNodeArrayBegMem);
+			iStatus = clSetKernelArg(m_SAHSplitKernel, 3, sizeof(cl_mem), &splitNodeArrayEndMem);
+
+			iStatus = clEnqueueNDRangeKernel(m_Queue, m_SAHSplitKernel, 1, 0, &globalSize, &localSize, 0, NULL, NULL);
+			CheckError(iStatus, _T("clEnqueueNDRangeKernel of SAHSplitKernel_Common"));
+
+			clReleaseMemObject(splitNodeArrayBegMem);
+			clReleaseMemObject(splitNodeArrayEndMem);
+			depth++;
+		}
+		clFinish(m_Queue);
+	}
+	else if ( SAHSPLIT_SAA == m_ConfigInfo->SAHType | SAHSPLIT_PSO == m_ConfigInfo->SAHType)
+	{
+		m_SplitNodeArrayMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(SplitNode)*maxSplitNodeArrayLength, &splitNodeArray[0], &iStatus);
+		CheckError(iStatus, _T("clCreateBuffer of SplitNodeArray"));
+		
+		clSetKernelArg(m_SAHSplitKernel, 1, sizeof(cl_mem), &m_SplitNodeArrayMem);
+
+		int maxLayerLenght = getMin2Power(m_InputInfo.size());
+std::vector<int> randArray(maxLayerLenght);
+		for (int i = 0; i < maxLayerLenght; i++)
+		{
+			randArray[i] = rand() % maxLayerLenght;
+		}
+		cl_mem randArrayMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int)*maxLayerLenght, &randArray[0], &iStatus);
+		clSetKernelArg(m_SAHSplitKernel, 4, sizeof(cl_mem), &randArrayMem);
+
+		std::vector<float> randPro((m_ConfigInfo->originTmp)*(m_ConfigInfo->PSOSampleCount));
+		for (int i = 0; i < randPro.size(); i++)
+		{
+			randPro[i] = (rand()%10)/10.0;
+		}
+
+		cl_mem randProMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(float)*randPro.size(), &randPro[0], &iStatus);
+		clSetKernelArg(m_SAHSplitKernel, 5, sizeof(cl_mem), &randProMem);
+
+		int depth = 0;
+		for (int i= 1; (i < log((float) maxSplitNodeArrayLength)/log(2.0)) && (depth < m_ConfigInfo->maxKDTreeDepth); i++)
+		{
+			int splitNodeArrayBeg = pow(2.0, i-1) - 1;
+			int splitNodeArrayEnd = pow(2.0, i) - 2;
+			size_t layerLength = splitNodeArrayEnd - splitNodeArrayBeg + 1;
+			const size_t globalSize = layerLength;
+			const size_t localSize = 64;
+			cl_mem splitNodeArrayBegMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), &splitNodeArrayBeg, &iStatus);
+			CheckError(iStatus, _T("create buffer of SplitNodeArrayBegMem"));
+			cl_mem splitNodeArrayEndMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), &splitNodeArrayEnd, &iStatus);
+			CheckError(iStatus, _T("create buffer of SplitNodeArrayEndMem"));
+			clSetKernelArg(m_SAHSplitKernel, 2, sizeof(cl_mem), &splitNodeArrayBegMem);
+			clSetKernelArg(m_SAHSplitKernel, 3, sizeof(cl_mem), &splitNodeArrayEndMem);
+
+			iStatus = clEnqueueNDRangeKernel(m_Queue, m_SAHSplitKernel, 1, 0, &globalSize, &localSize, 0, NULL, NULL);
+			CheckError(iStatus, _T("EnqueueNDRangeKernel of SAHSplit_NONCOMMON"));
+			clReleaseMemObject(splitNodeArrayBegMem);
+			clReleaseMemObject(splitNodeArrayEndMem);
+			depth++;
+		}
+		clFinish(m_Queue);
+		clReleaseMemObject(randProMem);
+		clReleaseMemObject(randArrayMem);
+	}
+
+	DWORD dEndTime = GetTickCount();
+	DWORD dBuildTime = dEndTime - dBegTime;
+	auto sBuildTime = TToStr(dBuildTime);
+	CString info = _T("构建KD-Tree完成！	--花费时间:") + StrToCStr(sBuildTime) + _T("(ms)"); 
+
+}
+
+BOOL COpenCLCompute::CalPBO()
+{
+	cl_int iStatus;
+	//计算PBO_Mem
+	if ( OFFLINE_RENDERING == m_RenderType )
+	{
+		/*cl_mem cmWinWidthMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), (void*) &ciRenderWinWidth, &iStatus);
+		CheckError(iStatus, _T("clCreateBuffer of cmWinWidthMem"));
+
+		cl_mem cmWinHeightMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), (void*) &ciRenderWinHeight, &iStatus);
+		CheckError(iStatus, _T("clCreateBuffer of cmWinHeightMem"));
+
+		iStatus = clSetKernelArg(m_RayTraceKernel, 0, sizeof(cl_mem), &m_SplitNodeArrayMem);
+		iStatus = clSetKernelArg(m_RayTraceKernel, 1, sizeof(cl_mem), &cmWinWidthMem);
+		iStatus = clSetKernelArg(m_RayTraceKernel, 2, sizeof(cl_mem), &cmWinHeightMem);
+
+		m_PBOMem = clCreateFromGLBuffer(m_Context, CL_MEM_WRITE_ONLY, m_PBO, &iStatus);
+		CheckError(iStatus, _T("clCreateFromGLBuffer of PBOMem"));
+		clSetKernelArg(m_RayTraceKernel, 3, sizeof(cl_mem), &m_PBOMem);
+
+		std::vector<TriangleInfo> svTriangleInfo = m_DrawInfo->triangleInfoArray;
+		cl_mem clmTriangleInfoMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(TriangleInfo)*m_DrawInfo->triangleInfoArray.size(), &svTriangleInfo[0], &iStatus);
+		iStatus = clSetKernelArg(m_RayTraceKernel, 4, sizeof(cl_mem), &clmTriangleInfoMem);
+		iStatus = clSetKernelArg(m_RayTraceKernel, 5, sizeof(cl_mem), &m_InputInfoMem);
+
+		cl_int cliLength = GetNodeArrayMaxLength(m_InputInfo.size());
+		cl_mem lengthMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_int), &cliLength, &iStatus);
+		iStatus = clSetKernelArg(m_RayTraceKernel, 6, sizeof(cl_mem), &lengthMem);
+
+
+		glFinish();
+		iStatus = clEnqueueAcquireGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
+		CheckError(iStatus, _T("获取GL环境下的PBO控制权"));
+		iStatus = clEnqueueNDRangeKernel(m_Queue, m_RayTraceKernel, 2, NULL, &pixelGlobalGroup[0], &pixelLocalGroup[0], 0, NULL, NULL);
+		CheckError(iStatus, _T("计算PBO"));
+		clFinish(m_Queue);
+		iStatus = clEnqueueReleaseGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
+		CheckError(iStatus, _T("释放CL环境下的PBO控制权"));
+		clFinish(m_Queue);
+
+		clReleaseMemObject(cmWinWidthMem);
+		clReleaseMemObject(cmWinHeightMem);
+		clReleaseMemObject(m_PBOMem);
+		clReleaseMemObject(clmTriangleInfoMem);
+		clReleaseMemObject(m_InputInfoMem);
+		clReleaseMemObject(lengthMem);*/
+		
+		m_PBOMem = clCreateFromGLBuffer(m_Context, CL_MEM_WRITE_ONLY, m_PBO, &iStatus);
+		CheckError(iStatus, _T("clCreateFromBuffer of PBOMem "));
+		iStatus = clSetKernelArg(m_RayTraceKernel, 0, sizeof(cl_mem), &m_PBOMem);
+
+		glFinish();
+		iStatus = clEnqueueAcquireGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
+		CheckError(iStatus, _T("获取GL环境下的PBO控制权"));
+		iStatus = clEnqueueNDRangeKernel(m_Queue, m_RayTraceKernel, 2, NULL, &pixelGlobalGroup[0], &pixelLocalGroup[0], 0, NULL, NULL);
+		CheckError(iStatus, _T("计算PBO"));
+		iStatus = clFinish(m_Queue);
+		iStatus = clEnqueueReleaseGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
+		CheckError(iStatus, _T("释放CL环境下的PBO控制权"));
+		iStatus = clFinish(m_Queue);
+		
+	}
+	else if ( REALTIME_RENDERING == m_RenderType)
+	{
+
+	}
+	return TRUE;
+	//测试代码
+	/*cl_mem m_testMem = clCreateBuffer(m_Context, CL_MEM_READ_WRITE, 4*ciRenderWinHeight*ciRenderWinWidth*sizeof(unsigned char), 0, &iStatus);
+	CheckError(iStatus,_T("test pre！"));
+	iStatus = clSetKernelArg(m_RayTraceKernel, 0, sizeof(cl_mem), &m_testMem);
+	CheckError(iStatus, _T("test set!"));
+	iStatus = clEnqueueNDRangeKernel(m_Queue, m_RayTraceKernel, 2, NULL, &pixelGlobalGroup[0], &pixelLocalGroup[0], 0, NULL, NULL);
+	clFinish(m_Queue);
+	CheckError(iStatus, _T("test cal !"));
+
+	std::vector<unsigned char> res(4*ciRenderWinHeight*ciRenderWinWidth);
+	iStatus = clEnqueueReadBuffer(m_Queue, m_testMem, CL_TRUE, 0, 4*ciRenderWinHeight*ciRenderWinWidth*sizeof(unsigned char), &res[0], 0, NULL, NULL);*/
+	
+	/*std::vector<unsigned char> color(4*ciRenderWinWidth*ciRenderWinHeight);
+	for (auto itr = color.begin(); itr != color.end();)
+	{
+		*itr = 255;
+		itr++;
+		*itr = 0;
+		itr++;
+		*itr = 0;
+		itr++;
+		*itr = 255;
+		itr++;
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_PBO);
+	glBufferData(GL_ARRAY_BUFFER, 4*ciRenderWinHeight*ciRenderWinWidth*sizeof(unsigned char), &color[0], GL_STATIC_DRAW);*/
+}
+
+void COpenCLCompute::SetModelInfo(ModelInfo* info)
+{
+	m_ModleInfo = info;
+}
+
+BOOL COpenCLCompute::SetSAASAHParam(int originTem, int thresholdTem , int singleSampleCount, float desSpeed)
+{
+	if (originTem <= thresholdTem | singleSampleCount <=0 | desSpeed<=0 | originTem <= 0 | thresholdTem <= 0)
+	{
+		CheckError(!CL_SUCCESS, _T("SAA_SAH参数设置"));
+		return FALSE;
+	}
+	m_ConfigInfo->SAHType = SAHSPLIT_PSO;
+	m_ConfigInfo->originTmp = originTem;
+	m_ConfigInfo->SAASingleSampleCount = singleSampleCount;
+	m_ConfigInfo->descSpeed = desSpeed;
+	return TRUE;
+}
+
+BOOL COpenCLCompute::SetPSOSAHParam(int particleNum, int sampleCount, float inertiaWeight, float c1Weight, float c2Weight, float singleMaxShift)
+{
+	if( particleNum <= 0 | sampleCount <= 0 | inertiaWeight < 0 | c1Weight < 0 | c2Weight < 0 | singleMaxShift <= 0)
+	{
+		CheckError(!CL_SUCCESS, _T("PSO_SAH参数设置"));
+		return FALSE;
+	}
+	m_ConfigInfo->SAHType = SAHSPLIT_SAA;
+	m_ConfigInfo->particleNum = particleNum;
+	m_ConfigInfo->PSOSampleCount = sampleCount;
+	m_ConfigInfo->inertiaWeight = inertiaWeight;
+	m_ConfigInfo->c1Weight = c1Weight;
+	m_ConfigInfo->c2Weight = c2Weight;
+	m_ConfigInfo->singleMaxShift = singleMaxShift;
+	return TRUE;
+}
+
+ConfigInfo* COpenCLCompute::GetConfigInfo()
+{
+	return m_ConfigInfo;
 }

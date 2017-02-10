@@ -29,7 +29,7 @@ public:
 	CRenderDlg* GetInstance();
 	CRender*	GetRenderObj();
 	HWND		GetHandle();
-	void		Display();
+	//void		Display();
 //	CButton m_RenderDisplayBtn;
 	afx_msg void OnBnClickedRenderDisplayButton();
 };

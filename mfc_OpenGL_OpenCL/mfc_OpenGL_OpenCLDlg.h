@@ -7,6 +7,8 @@
 #include "afxcmn.h"
 #include "afxwin.h"
 #include "RenderDlg.h"
+#include "SAAParamDlg.h"
+#include "PSOParamDlg.h"
 
 // Cmfc_OpenGL_OpenCLDlg ¶Ô»°¿ò
 class Cmfc_OpenGL_OpenCLDlg : public CDialogEx
@@ -49,11 +51,15 @@ private:
 	static CRenderDlg*		m_RenderDlg;
 	std::vector<int> m_WorkGlobalGroup;
 	std::vector<int> m_WorkLocalGroup;
+	CPSOParamDlg*	m_PSOParamDlg;
+	CSAAParamDlg*	m_SAAParamDlg;
 public:
 	CEdit*	GetStatusEdt();
 	CString	GetEdtContent(CEdit* edit, wchar_t* info);
 	CRenderDlg* GetRenderDlg();
 	BOOL	CheckDimEdt(CEdit* edt, wchar_t* dimName, int index, bool flag = true);
+	void	SetModelInfo();
+	ConfigInfo* GetConfigInfo();
 public:
 	afx_msg int	OnCreate(LPCREATESTRUCT lpCreateStruct);
 	CTreeCtrl	m_hardwareInfoTreeCtl;

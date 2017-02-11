@@ -21,7 +21,7 @@ public:
 
 public:
 	int		CusSetPixelFormat(HDC hDC);
-	void	RenderScene();
+	BOOL	RenderScene();
 	COpenCLCompute*	GetCompObj();
 	BOOL	LoadObjInfo(std::string fileName);
 	void	InitContext();

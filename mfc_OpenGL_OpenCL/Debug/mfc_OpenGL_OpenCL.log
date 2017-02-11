@@ -1,4 +1,4 @@
-﻿生成启动时间为 2017/2/10 23:35:17。
+﻿生成启动时间为 2017/2/12 0:16:23。
      1>项目“D:\learning\Graduation_design\mfc_OpenGL_OpenCL\mfc_OpenGL_OpenCL\mfc_OpenGL_OpenCL.vcxproj”在节点 2 上(build 个目标)。
      1>InitializeBuildStatus:
          正在创建“Debug\mfc_OpenGL_OpenCL.unsuccessfulbuild”，因为已指定“AlwaysCreate”。
@@ -9,37 +9,37 @@
      1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(192): warning C4244: “=”: 从“std::streamoff”转换到“size_t”，可能丢失数据
      1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(229): warning C4996: 'clCreateCommandQueue': 被声明为已否决
                  d:\software\opencl\opencl sdk\6.3\include\cl\cl.h(1428) : 参见“clCreateCommandQueue”的声明
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(287): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
      1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(288): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
      1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(289): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(291): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(290): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
      1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(292): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
      1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(293): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(306): warning C4101: “iStatus”: 未引用的局部变量
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(334): warning C4101: “iStatus”: 未引用的局部变量
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(472): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(473): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(493): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(509): warning C4244: “参数”: 从“float”转换到“unsigned int”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(510): warning C4018: “<”: 有符号/无符号不匹配
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(512): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(521): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(522): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(654): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(654): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(654): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(654): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(660): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(661): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(668): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(668): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(668): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(668): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(668): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(674): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(675): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(294): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(307): warning C4101: “iStatus”: 未引用的局部变量
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(335): warning C4101: “iStatus”: 未引用的局部变量
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(474): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(475): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(500): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(516): warning C4244: “参数”: 从“float”转换到“unsigned int”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(517): warning C4018: “<”: 有符号/无符号不匹配
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(519): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(528): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(529): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(672): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(672): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(672): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(672): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(678): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(679): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(686): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(686): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(686): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(686): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(686): warning C4554: “|”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(692): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+     1>d:\learning\graduation_design\mfc_opengl_opencl\mfc_opengl_opencl\prallalcompute.cpp(693): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
        ResourceCompile:
-         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /D _DEBUG /D _UNICODE /D UNICODE /D _AFXDLL /l"0x0804" /IDebug\ /nologo /fo"Debug\mfc_OpenGL_OpenCL.res" mfc_OpenGL_OpenCL.rc 
+         所有输出均为最新。
        ManifestResourceCompile:
          所有输出均为最新。
        Link:
@@ -70,4 +70,4 @@
 
 生成成功。
 
-已用时间 00:00:06.43
+已用时间 00:00:05.22

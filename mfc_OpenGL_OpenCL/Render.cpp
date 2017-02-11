@@ -84,7 +84,7 @@ void CRender::OnPaint()
 	// TODO: 在此处添加消息处理程序代码
 	// 不为绘图消息调用 CWnd::OnPaint()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	RenderScene();
+	if(!RenderScene()) return;
 	SwapBuffers(m_HDC);
 }
 
@@ -147,14 +147,15 @@ void CRender::SetPBO()
 	GetCompObj()->SetPBO(m_PBO);
 }
 
-void CRender::RenderScene()
+BOOL CRender::RenderScene()
 {
 	/*glBegin(GL_LINES);
 	glVertex2f(-0.5f, -0.3f);
 	glVertex2f(0.4f, 0.6f);
 	glEnd();*/
 	//初始化渲染环境各参数
-	GetCompObj()->InitContext();
+	if(!GetCompObj()->InitContext()) return FALSE;
+	DWORD renderBeg = GetTickCount();
 	glGenTextures(1, &m_RenderTexture);
 	glBindTexture(GL_TEXTURE_2D, m_RenderTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ciRenderWinWidth, ciRenderWinHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
@@ -237,6 +238,11 @@ void CRender::RenderScene()
 	glDisableVertexAttribArray(1);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+	DWORD renderEnd = GetTickCount();
+	CString info = _T("\r\n渲染时间为: ") + StrToCStr(TToStr(renderEnd - renderBeg)) + _T("(ms)");
+	//systemLog->PrintStatus(info.GetBuffer());
+	return TRUE;
 }
 
 COpenCLCompute* CRender::GetCompObj()

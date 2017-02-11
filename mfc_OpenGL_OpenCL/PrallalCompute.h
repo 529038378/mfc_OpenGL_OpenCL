@@ -9,7 +9,7 @@ class CPraCompute
 {
 public:
 	virtual HardwareInfo* GetHardwareInfo() = 0;
-	virtual void InitContext()= 0;
+	virtual BOOL InitContext()= 0;
 	virtual void SetGLCLShared(bool flag = false) = 0;
 	virtual void SetNDRange(std::vector<int>&, std::vector<int>&, int dim = 0) = 0;
 	virtual BOOL OffLineRendering() = 0;
@@ -30,7 +30,7 @@ public:
 	virtual PlatformInfo GetPlatformInfo(std::vector<cl_platform_id>::iterator& itr);
 	virtual DeviceInfo GetDeviceInfo(std::vector<cl_device_id>::iterator& itr);
 
-	virtual void InitContext();
+	virtual BOOL InitContext();
 	virtual void SetGLCLShared(bool flag = false);
 	virtual void SetSelHardware(int platformIndex = 0, int deviceIndex = 0);
 	virtual void SetNDRange(std::vector<int>& workGlobalGroup, std::vector<int>& workLocalGroup, int dim = 0);

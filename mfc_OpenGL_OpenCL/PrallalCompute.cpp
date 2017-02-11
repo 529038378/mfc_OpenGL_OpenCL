@@ -166,7 +166,7 @@ DeviceInfo COpenCLCompute::GetDeviceInfo(std::vector<cl_device_id>::iterator& it
 	return deviceInfo;
 }
 
-void COpenCLCompute::InitContext()
+BOOL COpenCLCompute::InitContext()
 {
 	//设置context
 	
@@ -181,7 +181,7 @@ void COpenCLCompute::InitContext()
 		0
 	};
 	m_Context = clCreateContext(clProp, 1, &m_HardwareInfo->platformInfo[m_ConfigInfo->selPlaformIndex].deviceIDs[m_ConfigInfo->selDeviceIndex], NULL, NULL, &iStatus);
-	if(!CheckError(iStatus, _T("建立OpenGL-OpenCL共享context"))) return;
+	if(!CheckError(iStatus, _T("建立OpenGL-OpenCL共享context"))) return FALSE;
 
 	//读取kernel文件
 	std::ifstream ifFile("kernel.cl", std::ios_base::binary);
@@ -208,30 +208,31 @@ void COpenCLCompute::InitContext()
 		clGetProgramBuildInfo(m_Program, m_HardwareInfo->platformInfo[m_ConfigInfo->selPlaformIndex].deviceIDs[m_ConfigInfo->selDeviceIndex], CL_PROGRAM_BUILD_LOG, 0x10000, cInfo, NULL);
 		CString str = _T("编译device端程序——失败！！！\r\n原因如下：\r\n") + StrToCStr(cInfo) ;
 		systemLog->PrintStatus(str.GetBuffer());
-		return;
+		return FALSE;
 	}
 	systemLog->PrintStatus(_T("编译device端程序——成功！"));
 
 	m_BitonicSortKernel = clCreateKernel(m_Program, "BitonicSort", &iStatus);
-	if(!CheckError(iStatus, _T("获取BitonicSortKernel"))) return;
+	if(!CheckError(iStatus, _T("获取BitonicSortKernel"))) return FALSE;
 	m_CommSAHSplitKernel = clCreateKernel(m_Program, "SAHSplit", &iStatus);
-	if (!CheckError(iStatus, _T("获取SAHSplitKernel")))return;
+	if (!CheckError(iStatus, _T("获取SAHSplitKernel")))return FALSE;
 	m_SAASAHSplitKernel = clCreateKernel(m_Program, "SAASAHSplit", &iStatus);
-	if (!CheckError(iStatus, _T("获取SAASAHSplitKernel"))) return;
+	if (!CheckError(iStatus, _T("获取SAASAHSplitKernel"))) return FALSE;
 	m_PSOSAHSplitKernel = clCreateKernel(m_Program, "PSOSAHSplit", &iStatus);
-	if (!CheckError(iStatus, _T("获取PSOSAHSplitKernel"))) return;
+	if (!CheckError(iStatus, _T("获取PSOSAHSplitKernel"))) return FALSE;
 	m_RayTraceKernel = clCreateKernel(m_Program, "RayTrace", &iStatus);
-	if (!CheckError(iStatus, _T("获取RayTraceKernel"))) return;
+	if (!CheckError(iStatus, _T("获取RayTraceKernel"))) return FALSE;
 	
 	//默认设置
 	m_SAHSplitKernel = m_CommSAHSplitKernel;
 
 	m_Queue = clCreateCommandQueue(m_Context, m_HardwareInfo->platformInfo[m_ConfigInfo->selPlaformIndex].deviceIDs[m_ConfigInfo->selDeviceIndex], CL_QUEUE_PROFILING_ENABLE, &iStatus);
-	if (!CheckError(iStatus, _T("创建设备命令队列"))) return;
+	if (!CheckError(iStatus, _T("创建设备命令队列"))) return FALSE;
 
 
 	systemLog->PrintStatus(_T("\r\n运算环境初始化——成功！\r\n"));
 	m_ContextReady = true;
+	return TRUE;
 }
 
 void COpenCLCompute::SetSelHardware(int platformIndex /* = 0 */, int deviceIndex /* = 0 */)
@@ -321,11 +322,11 @@ BOOL COpenCLCompute::OffLineRendering()
 	m_DrawInfo = getTriangles(&m_ModleInfo->verts[0], &m_ModleInfo->normals[0], m_ModleInfo->verts.size());
 
 	m_RenderType = OFFLINE_RENDERING;
-	//BitonicSort();
-	//BuildKDTree();
+	BitonicSort();
+	BuildKDTree();
 	CalPBO();
 
-	systemLog->PrintStatus(_T("离线渲染成功！"));
+	systemLog->PrintStatus(_T("\r\n离线渲染成功！\r\n"));
 	return TRUE;
 }
 
@@ -347,10 +348,10 @@ BOOL COpenCLCompute::RealTimeRendering()
 
 	m_RenderType = REALTIME_RENDERING;
 	BitonicSort();
-	//BuildKDTree();
+	BuildKDTree();
 	CalPBO();
 
-	systemLog->PrintStatus(_T("实时渲染成功！"));
+	systemLog->PrintStatus(_T("\r\n实时渲染成功！\r\n"));
 	return TRUE;
 }
 
@@ -423,18 +424,18 @@ void COpenCLCompute::BitonicSort()
 	auto sSortTime = TToStr(dSortTime);
 
 	//测试代码
-	std::vector<TriangleCandidateSplitPlane> test(m_InputInfo.size());
+	/*std::vector<TriangleCandidateSplitPlane> test(m_InputInfo.size());
 	iStatus = clEnqueueReadBuffer(m_Queue, m_InputInfoMem, CL_TRUE, 0, m_InputInfo.size()*sizeof(TriangleCandidateSplitPlane), &test[0], 0, NULL, NULL);
 	CheckError(iStatus, _T("read buffer of inputInfoMem"));
-	clFinish(m_Queue);
-	CString info = _T("排序完成！	--花费时间:") + StrToCStr(sSortTime) + _T("(ms)");
+	clFinish(m_Queue);*/
+	CString info = _T("\r\n排序完成！	--花费时间:") + StrToCStr(sSortTime) + _T("(ms)\r\n");
 	systemLog->PrintStatus(info.GetBuffer());
 }
 
 void COpenCLCompute::BuildKDTree()
 {
 	cl_int iStatus;
-	DWORD dBegTime = GetTickCount();
+	DWORD buildTreeBeg = GetTickCount();
 
 	clSetKernelArg(m_SAHSplitKernel, 0, sizeof(cl_mem), &m_InputInfoMem);
 	int maxSplitNodeArrayLength = GetNodeArrayMaxLength(m_InputInfo.size());
@@ -456,10 +457,11 @@ void COpenCLCompute::BuildKDTree()
 
 	cl_mem maxSizeMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), &maxSplitNodeArrayLength, &iStatus);
 	CheckError(iStatus, _T("create buffer of MaxSize"));
-	clSetKernelArg(m_SAHSplitKernel, 6, sizeof(cl_mem), &maxSizeMem);
+	//iStatus = clSetKernelArg(m_SAHSplitKernel, 6, sizeof(cl_mem), &maxSizeMem);
 
 	if ( SAHSPLIT_COMM == m_ConfigInfo->SAHType )
 	{
+		iStatus = clSetKernelArg(m_SAHSplitKernel, 4, sizeof(cl_mem), &maxSizeMem);
 		m_SplitNodeArrayMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_WRITE, sizeof(SplitNode)*maxSplitNodeArrayLength, &splitNodeArray[0], &iStatus);
 		CheckError(iStatus, _T("create buffer of CommSplitNodeArrayMem"));
 
@@ -488,6 +490,11 @@ void COpenCLCompute::BuildKDTree()
 			clReleaseMemObject(splitNodeArrayEndMem);
 			depth++;
 		}
+		clFinish(m_Queue);
+
+		std::vector<SplitNode> test(splitNodeArray.size());
+		iStatus = clEnqueueReadBuffer(m_Queue, m_SplitNodeArrayMem, CL_TRUE, 0, maxSplitNodeArrayLength*sizeof(SplitNode), &test[0], 0, NULL, NULL);
+		CheckError(iStatus, _T("read buffer of inputInfoMem"));
 		clFinish(m_Queue);
 	}
 	else if ( SAHSPLIT_SAA == m_ConfigInfo->SAHType | SAHSPLIT_PSO == m_ConfigInfo->SAHType)
@@ -541,20 +548,21 @@ std::vector<int> randArray(maxLayerLenght);
 		clReleaseMemObject(randArrayMem);
 	}
 
-	DWORD dEndTime = GetTickCount();
-	DWORD dBuildTime = dEndTime - dBegTime;
-	auto sBuildTime = TToStr(dBuildTime);
-	CString info = _T("构建KD-Tree完成！	--花费时间:") + StrToCStr(sBuildTime) + _T("(ms)"); 
-
+	DWORD buildTreeEnd = GetTickCount();
+	DWORD buildTime = buildTreeEnd - buildTreeBeg;
+	auto sBuildTime = TToStr(buildTime);
+	CString info = _T("\r\n构建KD-Tree完成！	--花费时间:") + StrToCStr(sBuildTime) + _T("(ms)\r\n"); 
+	systemLog->PrintStatus(info.GetBuffer());
 }
 
 BOOL COpenCLCompute::CalPBO()
 {
 	cl_int iStatus;
+	DWORD calBeg = GetTickCount();
 	//计算PBO_Mem
 	if ( OFFLINE_RENDERING == m_RenderType )
 	{
-		/*cl_mem cmWinWidthMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), (void*) &ciRenderWinWidth, &iStatus);
+		cl_mem cmWinWidthMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), (void*) &ciRenderWinWidth, &iStatus);
 		CheckError(iStatus, _T("clCreateBuffer of cmWinWidthMem"));
 
 		cl_mem cmWinHeightMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), (void*) &ciRenderWinHeight, &iStatus);
@@ -577,6 +585,12 @@ BOOL COpenCLCompute::CalPBO()
 		cl_mem lengthMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_int), &cliLength, &iStatus);
 		iStatus = clSetKernelArg(m_RayTraceKernel, 6, sizeof(cl_mem), &lengthMem);
 
+		int posX = ciRenderWinWidth/2;
+		int posY = ciRenderWinHeight/2;
+		cl_mem posXMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int), &posX, &iStatus);
+		cl_mem posYMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int), &posY, &iStatus);
+		iStatus = clSetKernelArg(m_RayTraceKernel, 7, sizeof(cl_mem), &posXMem);
+		iStatus = clSetKernelArg(m_RayTraceKernel, 8, sizeof(cl_mem), &posYMem);
 
 		glFinish();
 		iStatus = clEnqueueAcquireGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
@@ -588,14 +602,14 @@ BOOL COpenCLCompute::CalPBO()
 		CheckError(iStatus, _T("释放CL环境下的PBO控制权"));
 		clFinish(m_Queue);
 
-		clReleaseMemObject(cmWinWidthMem);
-		clReleaseMemObject(cmWinHeightMem);
-		clReleaseMemObject(m_PBOMem);
-		clReleaseMemObject(clmTriangleInfoMem);
-		clReleaseMemObject(m_InputInfoMem);
-		clReleaseMemObject(lengthMem);*/
+		//clReleaseMemObject(cmWinWidthMem);
+		//clReleaseMemObject(cmWinHeightMem);
+		//clReleaseMemObject(m_PBOMem);
+		//clReleaseMemObject(clmTriangleInfoMem);
+		//clReleaseMemObject(m_InputInfoMem);
+		//clReleaseMemObject(lengthMem);
 		
-		m_PBOMem = clCreateFromGLBuffer(m_Context, CL_MEM_WRITE_ONLY, m_PBO, &iStatus);
+		/*m_PBOMem = clCreateFromGLBuffer(m_Context, CL_MEM_WRITE_ONLY, m_PBO, &iStatus);
 		CheckError(iStatus, _T("clCreateFromBuffer of PBOMem "));
 		iStatus = clSetKernelArg(m_RayTraceKernel, 0, sizeof(cl_mem), &m_PBOMem);
 
@@ -607,13 +621,17 @@ BOOL COpenCLCompute::CalPBO()
 		iStatus = clFinish(m_Queue);
 		iStatus = clEnqueueReleaseGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
 		CheckError(iStatus, _T("释放CL环境下的PBO控制权"));
-		iStatus = clFinish(m_Queue);
+		iStatus = clFinish(m_Queue);*/
 		
 	}
 	else if ( REALTIME_RENDERING == m_RenderType)
 	{
 
 	}
+
+	DWORD calEnd = GetTickCount();
+	CString info = _T("\r\n渲染成功！	--花费时间为: ") + StrToCStr(TToStr(calEnd - calBeg)) + _T("(ms)\r\n");
+	systemLog->PrintStatus(info.GetBuffer());
 	return TRUE;
 	//测试代码
 	/*cl_mem m_testMem = clCreateBuffer(m_Context, CL_MEM_READ_WRITE, 4*ciRenderWinHeight*ciRenderWinWidth*sizeof(unsigned char), 0, &iStatus);

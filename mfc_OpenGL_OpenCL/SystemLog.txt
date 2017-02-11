@@ -52,7 +52,91 @@ Selected Device:			GeForce 940MX
 运算环境初始化——成功！
 
 
-clCreateFromBuffer of PBOMem --成功！
+clCreateBuffer of InputInfoMem--成功！
+
+clCreateBuffer of dirMem--成功！
+
+clEnqueueNDRangeKernel of BitonicSort--成功！
+
+
+排序完成！	--花费时间:47(ms)
+
+
+create buffer of MaxSize--成功！
+
+create buffer of CommSplitNodeArrayMem--成功！
+
+create buffer of SplitNodeArrayBegMem--成功！
+
+create buffer of SplitNodeArrayEndMem--成功！
+
+clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+
+create buffer of SplitNodeArrayBegMem--成功！
+
+create buffer of SplitNodeArrayEndMem--成功！
+
+clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+
+create buffer of SplitNodeArrayBegMem--成功！
+
+create buffer of SplitNodeArrayEndMem--成功！
+
+clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+
+create buffer of SplitNodeArrayBegMem--成功！
+
+create buffer of SplitNodeArrayEndMem--成功！
+
+clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+
+create buffer of SplitNodeArrayBegMem--成功！
+
+create buffer of SplitNodeArrayEndMem--成功！
+
+clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+
+create buffer of SplitNodeArrayBegMem--成功！
+
+create buffer of SplitNodeArrayEndMem--成功！
+
+clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+
+create buffer of SplitNodeArrayBegMem--成功！
+
+create buffer of SplitNodeArrayEndMem--成功！
+
+clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+
+create buffer of SplitNodeArrayBegMem--成功！
+
+create buffer of SplitNodeArrayEndMem--成功！
+
+clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+
+create buffer of SplitNodeArrayBegMem--成功！
+
+create buffer of SplitNodeArrayEndMem--成功！
+
+clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+
+create buffer of SplitNodeArrayBegMem--成功！
+
+create buffer of SplitNodeArrayEndMem--成功！
+
+clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+
+read buffer of inputInfoMem--成功！
+
+
+构建KD-Tree完成！	--花费时间:265(ms)
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
 
 获取GL环境下的PBO控制权--成功！
 
@@ -60,5 +144,11 @@ clCreateFromBuffer of PBOMem --成功！
 
 释放CL环境下的PBO控制权--成功！
 
+
+渲染成功！	--花费时间为: 266(ms)
+
+
+
 离线渲染成功！
+
 

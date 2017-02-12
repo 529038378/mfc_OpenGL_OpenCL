@@ -745,6 +745,7 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedOffLineRenderingButton()
 	m_Render->GetCompObj()->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
 	m_Render->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
 	//if(!m_Render->GetCompObj()->OffLineRendering()) return;
+	m_Render->GetCompObj()->SetRenderType(OFFLINE_RENDERING);
 	m_RenderDlg->DoModal();
 }
 
@@ -755,6 +756,7 @@ void Cmfc_OpenGL_OpenCLDlg::OnBnClickedRealtimeRenderingButton()
 	m_Render->GetCompObj()->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
 	m_Render->SetRenderDlg(dynamic_cast<CDialog*>(m_RenderDlg));
 	//if(!m_Render->GetCompObj()->RealTimeRendering()) return;
+	m_Render->GetCompObj()->SetRenderType(REALTIME_RENDERING);
 	m_RenderDlg->DoModal();
 }
 
@@ -772,3 +774,4 @@ ConfigInfo* Cmfc_OpenGL_OpenCLDlg::GetConfigInfo()
 {
 	return m_Render->GetCompObj()->GetConfigInfo();
 }
+

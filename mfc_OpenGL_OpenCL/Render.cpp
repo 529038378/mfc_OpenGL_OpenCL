@@ -74,7 +74,42 @@ int CRender::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	SetDC();
-	m_firstRender = true;
+	GetCompObj()->InitContext();
+
+	glGenTextures(1, &m_RenderTexture);
+	glBindTexture(GL_TEXTURE_2D, m_RenderTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ciRenderWinWidth, ciRenderWinHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ciRenderWinWidth, ciRenderWinHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glBindTexture(0, m_RenderTexture);
+
+	glGenFramebuffers(1, &m_FrameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBuffer);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_RenderTexture, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glGenBuffers(1, &m_VertArrayID);
+	glBindVertexArray(m_VertArrayID);
+
+	glGenBuffers(1, &m_QuadVert);
+	glBindBuffer(GL_ARRAY_BUFFER, m_QuadVert);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cfQuadVertBuffer), cfQuadVertBuffer, GL_STATIC_DRAW);
+
+
+
+	glGenBuffers(1, &m_PBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_PBO);
+	glBufferData(GL_ARRAY_BUFFER, ciRenderWinHeight*ciRenderWinWidth*4*sizeof(unsigned char), 0, GL_STREAM_DRAW);
+	GetCompObj()->SetPBO(m_PBO);
+
+	if ( !GetCompObj()->IsReady() ) return -1;
+	GetCompObj()->LoadData();
+	GetCompObj()->BitonicSort();
+	GetCompObj()->BuildKDTree();
 	return 0;
 }
 
@@ -155,45 +190,13 @@ BOOL CRender::RenderScene()
 	glVertex2f(0.4f, 0.6f);
 	glEnd();*/
 	//初始化渲染环境各参数
-	if (m_firstRender)
-	{
-		if(!GetCompObj()->InitContext()) return FALSE;
-		m_firstRender = false;
-	}
+	
 	
 	DWORD renderBeg = GetTickCount();
-	glGenTextures(1, &m_RenderTexture);
-	glBindTexture(GL_TEXTURE_2D, m_RenderTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ciRenderWinWidth, ciRenderWinHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ciRenderWinWidth, ciRenderWinHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-	glBindTexture(0, m_RenderTexture);
-
-	glGenFramebuffers(1, &m_FrameBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBuffer);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_RenderTexture, 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glGenBuffers(1, &m_VertArrayID);
-	glBindVertexArray(m_VertArrayID);
-
-	glGenBuffers(1, &m_QuadVert);
-	glBindBuffer(GL_ARRAY_BUFFER, m_QuadVert);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cfQuadVertBuffer), cfQuadVertBuffer, GL_STATIC_DRAW);
-
-
-	std::vector<unsigned char> color(4*ciRenderWinWidth*ciRenderWinHeight);
 	
-	glGenBuffers(1, &m_PBO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_PBO);
-	glBufferData(GL_ARRAY_BUFFER, ciRenderWinHeight*ciRenderWinWidth*4*sizeof(unsigned char), 0, GL_STREAM_DRAW);
 
-	GetCompObj()->SetPBO(m_PBO);
-	GetCompObj()->OffLineRendering();
+	
+	GetCompObj()->Render();
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_PBO);
 	glBindTexture(GL_TEXTURE_2D, m_RenderTexture);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, ciRenderWinWidth, ciRenderWinHeight, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -286,4 +289,31 @@ void CRender::SetRenderDlg(CDialog* dlg)
 ModelInfo* CRender::GetModelInfo()
 {
 	return m_ModelInfo;
+}
+
+BOOL CRender::PreTranslateMessage(MSG* pMsg)
+{
+	if ( WM_MOUSEMOVE == pMsg->message )
+	{
+		if ( REALTIME_RENDERING == GetCompObj()->GetRenderType())
+		{
+			static BOOL first = TRUE;
+			if (first)
+			{
+				first = false;
+				CPoint point(ciRenderWinWidth/2, ciRenderWinHeight/2);
+				ClientToScreen(&point);
+				SetCursorPos(point.x, point.y);
+			}
+			CPoint point;
+			GetCursorPos(&point);
+			ScreenToClient(&point);
+			GetCompObj()->SetShiftCursorPos(point);
+
+			Invalidate();
+			UpdateWindow();
+			return TRUE;
+		}
+	}
+	return CWnd::PreTranslateMessage(pMsg);
 }

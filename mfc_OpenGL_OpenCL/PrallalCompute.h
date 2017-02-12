@@ -49,6 +49,12 @@ public:
 	virtual BOOL CalPBO();
 	virtual void SetModelInfo(ModelInfo*);
 	virtual ConfigInfo* GetConfigInfo();
+	virtual	void Render();
+	virtual BOOL SetRenderType(int type);
+	virtual int	 GetRenderType() const;
+	virtual void SetShiftCursorPos(CPoint point);
+	virtual BOOL IsReady();
+	virtual BOOL LoadData();
 private:
 	HardwareInfo*	m_HardwareInfo;
 	cl_context		m_Context;
@@ -71,7 +77,6 @@ private:
 	cl_mem			m_PBOMem;
 	HDC				m_HDC;
 	HGLRC			m_HGLRC;
-	enum{ OFFLINE_RENDERING = 0x1000, REALTIME_RENDERING = 0x1001,};
 	int				m_RenderType;
 
 	DrawableInfo*	m_DrawInfo;
@@ -87,6 +92,9 @@ private:
 	cl_mem			m_adVMem;
 	cl_mem			m_adBest;
 	cl_mem			m_randProMem;
+	cl_mem			m_PosXMem;
+	cl_mem			m_PosYMem;
+	CPoint			m_ShiftCursorPos;
 };
 
 

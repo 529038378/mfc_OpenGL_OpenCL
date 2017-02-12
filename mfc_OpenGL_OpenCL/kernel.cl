@@ -179,6 +179,16 @@ float4  mul(struct mat4 m4, float4 l)
 		
 };
 
+uchar3 uc3MulFloat(uchar3 opa, float opb)
+{
+	uchar3 res;
+	res.x = opa.x * opb;
+	res.y = opa.y * opb;
+	res.z = opa.z * opb;
+	//res.w = res.w * opb;
+	return res;
+}
+
 void UpdateSplitNodeWithAABBInfo(__global struct SplitNode *nodeArray,
 								 int idx, 
 								__global const struct TriangleCandidateSplitPlane *input)
@@ -963,7 +973,7 @@ __kernel void RayTrace(__global const struct SplitNode* spSplitNodeArray,
 		else if( 0 != i)
 		{
 			float fDist = distance(f3Pos, f3NextPos);
-			//f3Res = f3Res + uc3TmpColor*50.0*cosAlpha / (fDist*fDist);
+			f3Res = f3Res + uc3MulFloat(uc3TmpColor, 50.0*cosAlpha / (fDist*fDist));
 		}
 		f3Pos = f3NextPos;
 		f3LightDir = f3NextDir;

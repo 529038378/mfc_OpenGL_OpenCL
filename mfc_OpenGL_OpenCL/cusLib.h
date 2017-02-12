@@ -34,6 +34,12 @@ enum {
 	SAHSPLIT_PSO	=	0x2000002,
 };
 
+enum{ 
+	OFFLINE_RENDERING = 0x1000, 
+	REALTIME_RENDERING = 0x1001,
+};
+
+
 static const GLfloat cfQuadVertBuffer[] = 
 {
 	-1.0f, -1.0f, 0.0f,

@@ -2,4 +2,4 @@
 /ipch
 /mfc_OpenGL_OpenCL/Debug
 /mfc_OpenGL_OpenCL/res
-
+*.nvact

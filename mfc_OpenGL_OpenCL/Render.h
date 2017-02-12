@@ -30,6 +30,7 @@ public:
 	void	SetPBO();
 	void	SetDC();
 	ModelInfo*	GetModelInfo();
+	BOOL	PreTranslateMessage(MSG* pMsg);
 private:
 	HDC		m_HDC;
 	HGLRC	m_HGLRC;

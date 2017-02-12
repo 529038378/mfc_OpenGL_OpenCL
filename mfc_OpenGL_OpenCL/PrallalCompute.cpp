@@ -305,26 +305,11 @@ void COpenCLCompute::SetParamReady(bool flagParam /* = true */)
 
 BOOL COpenCLCompute::OffLineRendering()
 {
-	cl_int iStatus;
-	if(!m_ContextReady)
-	{
-		MessageBox(AfxGetMainWnd()->m_hWnd,_T("Error:运算环境未初始化！"), NULL, 0);
-		systemLog->PrintStatus(_T("Error:	运算环境未初始化！"));
-		return FALSE;
-	}
-	if (!m_ParamReady)
-	{
-		MessageBox(AfxGetMainWnd()->m_hWnd,_T("Error:参数设置出错！"), NULL, 0);
-		systemLog->PrintStatus(_T("Error:	参数设置出错！"));
-		return FALSE;
-	}
+	
 
-	m_DrawInfo = new DrawableInfo;
-	m_DrawInfo = getTriangles(&m_ModleInfo->verts[0], &m_ModleInfo->normals[0], m_ModleInfo->verts.size());
+	
 
-	m_RenderType = OFFLINE_RENDERING;
-	BitonicSort();
-	BuildKDTree();
+	//m_RenderType = OFFLINE_RENDERING;
 	CalPBO();
 
 	systemLog->PrintStatus(_T("\r\n离线渲染成功！\r\n"));
@@ -333,23 +318,9 @@ BOOL COpenCLCompute::OffLineRendering()
 
 BOOL COpenCLCompute::RealTimeRendering()
 {
-	cl_int iStatus;
-	if(!m_ContextReady)
-	{
-		MessageBox(AfxGetMainWnd()->m_hWnd,_T("Error:运算环境未初始化！"), NULL, 0);
-		systemLog->PrintStatus(_T("Error:	运算环境未初始化！"));
-		return FALSE;
-	}
-	if (!m_ParamReady)
-	{
-		MessageBox(AfxGetMainWnd()->m_hWnd,_T("Error:参数设置出错！"), NULL, 0);
-		systemLog->PrintStatus(_T("Error:	参数设置出错！"));
-		return FALSE;
-	}
+	
 
-	m_RenderType = REALTIME_RENDERING;
-	BitonicSort();
-	BuildKDTree();
+	//m_RenderType = REALTIME_RENDERING;
 	CalPBO();
 
 	systemLog->PrintStatus(_T("\r\n实时渲染成功！\r\n"));
@@ -493,10 +464,11 @@ void COpenCLCompute::BuildKDTree()
 		}
 		clFinish(m_Queue);
 
-		std::vector<SplitNode> test(splitNodeArray.size());
+		//测试代码
+		/*std::vector<SplitNode> test(splitNodeArray.size());
 		iStatus = clEnqueueReadBuffer(m_Queue, m_SplitNodeArrayMem, CL_TRUE, 0, maxSplitNodeArrayLength*sizeof(SplitNode), &test[0], 0, NULL, NULL);
 		CheckError(iStatus, _T("read buffer of inputInfoMem"));
-		clFinish(m_Queue);
+		clFinish(m_Queue);*/
 	}
 	else if ( SAHSPLIT_SAA == m_ConfigInfo->SAHType | SAHSPLIT_PSO == m_ConfigInfo->SAHType)
 	{
@@ -606,82 +578,70 @@ BOOL COpenCLCompute::CalPBO()
 	cl_int iStatus;
 	DWORD calBeg = GetTickCount();
 	//计算PBO_Mem
-	if ( OFFLINE_RENDERING == m_RenderType )
+	
+	cl_mem cmWinWidthMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), (void*) &ciRenderWinWidth, &iStatus);
+	CheckError(iStatus, _T("clCreateBuffer of cmWinWidthMem"));
+
+	cl_mem cmWinHeightMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), (void*) &ciRenderWinHeight, &iStatus);
+	CheckError(iStatus, _T("clCreateBuffer of cmWinHeightMem"));
+
+	iStatus = clSetKernelArg(m_RayTraceKernel, 0, sizeof(cl_mem), &m_SplitNodeArrayMem);
+	iStatus = clSetKernelArg(m_RayTraceKernel, 1, sizeof(cl_mem), &cmWinWidthMem);
+	iStatus = clSetKernelArg(m_RayTraceKernel, 2, sizeof(cl_mem), &cmWinHeightMem);
+
+	m_PBOMem = clCreateFromGLBuffer(m_Context, CL_MEM_WRITE_ONLY, m_PBO, &iStatus);
+	CheckError(iStatus, _T("clCreateFromGLBuffer of PBOMem"));
+	clSetKernelArg(m_RayTraceKernel, 3, sizeof(cl_mem), &m_PBOMem);
+
+	std::vector<TriangleInfo> svTriangleInfo = m_DrawInfo->triangleInfoArray;
+	cl_mem clmTriangleInfoMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(TriangleInfo)*m_DrawInfo->triangleInfoArray.size(), &svTriangleInfo[0], &iStatus);
+	iStatus = clSetKernelArg(m_RayTraceKernel, 4, sizeof(cl_mem), &clmTriangleInfoMem);
+	iStatus = clSetKernelArg(m_RayTraceKernel, 5, sizeof(cl_mem), &m_InputInfoMem);
+
+	cl_int cliLength = GetNodeArrayMaxLength(m_InputInfo.size());
+	cl_mem lengthMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_int), &cliLength, &iStatus);
+	iStatus = clSetKernelArg(m_RayTraceKernel, 6, sizeof(cl_mem), &lengthMem);
+
+	cl_mem eyePosMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(m_ConfigInfo->viewPos), &m_ConfigInfo->viewPos[0], &iStatus);
+	cl_mem lightPosMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(m_ConfigInfo->lightPos), &m_ConfigInfo->lightPos[0], &iStatus);
+	iStatus = clSetKernelArg(m_RayTraceKernel, 7, sizeof(cl_mem), &eyePosMem);
+	iStatus = clSetKernelArg(m_RayTraceKernel, 8, sizeof(cl_mem), &lightPosMem);
+
+	cl_mem iterMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int), &m_ConfigInfo->reflectCount, &iStatus);
+	iStatus = clSetKernelArg(m_RayTraceKernel, 9, sizeof(cl_mem), &iterMem);
+
+	
+	if ( OFFLINE_RENDERING == m_RenderType)
 	{
-		cl_mem cmWinWidthMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), (void*) &ciRenderWinWidth, &iStatus);
-		CheckError(iStatus, _T("clCreateBuffer of cmWinWidthMem"));
-
-		cl_mem cmWinHeightMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), (void*) &ciRenderWinHeight, &iStatus);
-		CheckError(iStatus, _T("clCreateBuffer of cmWinHeightMem"));
-
-		iStatus = clSetKernelArg(m_RayTraceKernel, 0, sizeof(cl_mem), &m_SplitNodeArrayMem);
-		iStatus = clSetKernelArg(m_RayTraceKernel, 1, sizeof(cl_mem), &cmWinWidthMem);
-		iStatus = clSetKernelArg(m_RayTraceKernel, 2, sizeof(cl_mem), &cmWinHeightMem);
-
-		m_PBOMem = clCreateFromGLBuffer(m_Context, CL_MEM_WRITE_ONLY, m_PBO, &iStatus);
-		CheckError(iStatus, _T("clCreateFromGLBuffer of PBOMem"));
-		clSetKernelArg(m_RayTraceKernel, 3, sizeof(cl_mem), &m_PBOMem);
-
-		std::vector<TriangleInfo> svTriangleInfo = m_DrawInfo->triangleInfoArray;
-		cl_mem clmTriangleInfoMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(TriangleInfo)*m_DrawInfo->triangleInfoArray.size(), &svTriangleInfo[0], &iStatus);
-		iStatus = clSetKernelArg(m_RayTraceKernel, 4, sizeof(cl_mem), &clmTriangleInfoMem);
-		iStatus = clSetKernelArg(m_RayTraceKernel, 5, sizeof(cl_mem), &m_InputInfoMem);
-
-		cl_int cliLength = GetNodeArrayMaxLength(m_InputInfo.size());
-		cl_mem lengthMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_int), &cliLength, &iStatus);
-		iStatus = clSetKernelArg(m_RayTraceKernel, 6, sizeof(cl_mem), &lengthMem);
-		
-		cl_mem eyePosMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(m_ConfigInfo->viewPos), &m_ConfigInfo->viewPos[0], &iStatus);
-		cl_mem lightPosMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(m_ConfigInfo->lightPos), &m_ConfigInfo->lightPos[0], &iStatus);
-		iStatus = clSetKernelArg(m_RayTraceKernel, 7, sizeof(cl_mem), &eyePosMem);
-		iStatus = clSetKernelArg(m_RayTraceKernel, 8, sizeof(cl_mem), &lightPosMem);
-
-		cl_mem iterMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int), &m_ConfigInfo->reflectCount, &iStatus);
-		iStatus = clSetKernelArg(m_RayTraceKernel, 9, sizeof(cl_mem), &iterMem);
-
 		int posX = ciRenderWinWidth/2;
 		int posY = ciRenderWinHeight/2;
-		cl_mem posXMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int), &posX, &iStatus);
-		cl_mem posYMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int), &posY, &iStatus);
-		iStatus = clSetKernelArg(m_RayTraceKernel, 10, sizeof(cl_mem), &posXMem);
-		iStatus = clSetKernelArg(m_RayTraceKernel, 11, sizeof(cl_mem), &posYMem);
-
-		glFinish();
-		iStatus = clEnqueueAcquireGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
-		CheckError(iStatus, _T("获取GL环境下的PBO控制权"));
-		iStatus = clEnqueueNDRangeKernel(m_Queue, m_RayTraceKernel, 2, NULL, &pixelGlobalGroup[0], &pixelLocalGroup[0], 0, NULL, NULL);
-		CheckError(iStatus, _T("计算PBO"));
-		clFinish(m_Queue);
-		iStatus = clEnqueueReleaseGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
-		CheckError(iStatus, _T("释放CL环境下的PBO控制权"));
-		clFinish(m_Queue);
-
-		clReleaseMemObject(cmWinWidthMem);
-		clReleaseMemObject(cmWinHeightMem);
-		//clReleaseMemObject(m_PBOMem);
-		clReleaseMemObject(clmTriangleInfoMem);
-		clReleaseMemObject(m_InputInfoMem);
-		clReleaseMemObject(lengthMem);
-		
-		/*m_PBOMem = clCreateFromGLBuffer(m_Context, CL_MEM_WRITE_ONLY, m_PBO, &iStatus);
-		CheckError(iStatus, _T("clCreateFromBuffer of PBOMem "));
-		iStatus = clSetKernelArg(m_RayTraceKernel, 0, sizeof(cl_mem), &m_PBOMem);
-
-		glFinish();
-		iStatus = clEnqueueAcquireGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
-		CheckError(iStatus, _T("获取GL环境下的PBO控制权"));
-		iStatus = clEnqueueNDRangeKernel(m_Queue, m_RayTraceKernel, 2, NULL, &pixelGlobalGroup[0], &pixelLocalGroup[0], 0, NULL, NULL);
-		CheckError(iStatus, _T("计算PBO"));
-		iStatus = clFinish(m_Queue);
-		iStatus = clEnqueueReleaseGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
-		CheckError(iStatus, _T("释放CL环境下的PBO控制权"));
-		iStatus = clFinish(m_Queue);*/
-		
+		m_PosXMem = clCreateBuffer(m_Context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int), &posX, &iStatus);
+		m_PosYMem = clCreateBuffer(m_Context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int), &posY, &iStatus);
 	}
 	else if ( REALTIME_RENDERING == m_RenderType)
 	{
-
+		m_PosXMem = clCreateBuffer(m_Context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int), &m_ShiftCursorPos.x, &iStatus);
+		m_PosYMem = clCreateBuffer(m_Context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int), &m_ShiftCursorPos.y, &iStatus);
 	}
+	iStatus = clSetKernelArg(m_RayTraceKernel, 10, sizeof(cl_mem), &m_PosXMem);
+	iStatus = clSetKernelArg(m_RayTraceKernel, 11, sizeof(cl_mem), &m_PosYMem);
+
+	glFinish();
+	iStatus = clEnqueueAcquireGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
+	CheckError(iStatus, _T("获取GL环境下的PBO控制权"));
+	iStatus = clEnqueueNDRangeKernel(m_Queue, m_RayTraceKernel, 2, NULL, &pixelGlobalGroup[0], &pixelLocalGroup[0], 0, NULL, NULL);
+	CheckError(iStatus, _T("计算PBO"));
+	clFinish(m_Queue);
+	iStatus = clEnqueueReleaseGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
+	CheckError(iStatus, _T("释放CL环境下的PBO控制权"));
+	clFinish(m_Queue);
+
+	clReleaseMemObject(cmWinWidthMem);
+	clReleaseMemObject(cmWinHeightMem);
+	//clReleaseMemObject(m_PBOMem);
+	clReleaseMemObject(clmTriangleInfoMem);
+	clReleaseMemObject(m_InputInfoMem);
+	clReleaseMemObject(lengthMem);
 
 	DWORD calEnd = GetTickCount();
 	CString info = _T("\r\n渲染成功！	--花费时间为: ") + StrToCStr(TToStr(calEnd - calBeg)) + _T("(ms)\r\n");
@@ -755,4 +715,61 @@ BOOL COpenCLCompute::SetPSOSAHParam(int particleNum, int sampleCount, float iner
 ConfigInfo* COpenCLCompute::GetConfigInfo()
 {
 	return m_ConfigInfo;
+}
+
+void COpenCLCompute::Render()
+{
+	if (  OFFLINE_RENDERING == m_RenderType)
+	{
+		OffLineRendering();
+	}
+	else if ( REALTIME_RENDERING == m_RenderType)
+	{
+		RealTimeRendering();
+	}
+}
+
+BOOL COpenCLCompute::SetRenderType(int type)
+{
+	if ( (OFFLINE_RENDERING != type )&&(REALTIME_RENDERING != type)) 
+	{
+		return FALSE;
+	}
+	m_RenderType = type;
+	return true;
+}
+
+int COpenCLCompute::GetRenderType() const
+{
+	return m_RenderType;
+}
+
+void COpenCLCompute::SetShiftCursorPos(CPoint point)
+{
+	m_ShiftCursorPos = point;
+}
+
+BOOL COpenCLCompute::IsReady()
+{
+	cl_int iStatus;
+	if(!m_ContextReady)
+	{
+		MessageBox(AfxGetMainWnd()->m_hWnd,_T("Error:运算环境未初始化！"), NULL, 0);
+		systemLog->PrintStatus(_T("Error:	运算环境未初始化！"));
+		return FALSE;
+	}
+	if (!m_ParamReady)
+	{
+		MessageBox(AfxGetMainWnd()->m_hWnd,_T("Error:参数设置出错！"), NULL, 0);
+		systemLog->PrintStatus(_T("Error:	参数设置出错！"));
+		return FALSE;
+	}
+	return TRUE;
+}
+
+BOOL COpenCLCompute::LoadData()
+{
+	m_DrawInfo = new DrawableInfo;
+	m_DrawInfo = getTriangles(&m_ModleInfo->verts[0], &m_ModleInfo->normals[0], m_ModleInfo->verts.size());
+	return TRUE;
 }

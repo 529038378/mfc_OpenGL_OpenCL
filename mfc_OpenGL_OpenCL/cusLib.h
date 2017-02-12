@@ -192,6 +192,26 @@ struct SplitNode
 
 };
 
+//SAA参数
+struct SAAParam 
+{
+	float originTmp;
+	float SAASingleSampleCount;
+	float descSpeed;
+};
+
+//PSO参数
+struct PSOParam
+{
+	float particleNum;
+	float PSOSampleCount;
+	float inertiaWeight;
+	float c1Weight;
+	float c2Weight;
+	float singleMaxShift;
+	int maxLength;
+};
+
 //初始化分割节点
 void InitialSplitNode(struct SplitNode *mNode);
 

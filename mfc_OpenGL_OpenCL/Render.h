@@ -45,6 +45,7 @@ private:
 	GLuint			m_Program;
 	GLuint			m_TexID;
 	GLuint			m_FrameBuffer;
+	bool			m_firstRender;
 };
 
 

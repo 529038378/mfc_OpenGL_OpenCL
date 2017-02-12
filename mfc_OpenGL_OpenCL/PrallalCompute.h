@@ -79,6 +79,14 @@ private:
 	std::vector<TriangleCandidateSplitPlane> m_InputInfo;
 	cl_mem			m_InputInfoMem;
 	cl_mem			m_SplitNodeArrayMem;
+	SAAParam		m_SAAParam;
+	PSOParam		m_PSOParam;
+	cl_mem			m_ParamMem;
+	cl_mem			m_adXMem;
+	cl_mem			m_adYMem;
+	cl_mem			m_adVMem;
+	cl_mem			m_adBest;
+	cl_mem			m_randProMem;
 };
 
 

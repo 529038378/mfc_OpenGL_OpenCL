@@ -74,6 +74,7 @@ int CRender::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	SetDC();
+	m_firstRender = true;
 	return 0;
 }
 
@@ -154,7 +155,12 @@ BOOL CRender::RenderScene()
 	glVertex2f(0.4f, 0.6f);
 	glEnd();*/
 	//初始化渲染环境各参数
-	if(!GetCompObj()->InitContext()) return FALSE;
+	if (m_firstRender)
+	{
+		if(!GetCompObj()->InitContext()) return FALSE;
+		m_firstRender = false;
+	}
+	
 	DWORD renderBeg = GetTickCount();
 	glGenTextures(1, &m_RenderTexture);
 	glBindTexture(GL_TEXTURE_2D, m_RenderTexture);

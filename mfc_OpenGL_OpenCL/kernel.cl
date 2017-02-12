@@ -1,7 +1,7 @@
-__constant float3 cf3LightPos = (float3)(7, 0, 0);
+//__constant float3 cf3LightPos = (float3)(7, 0, 0);
 __constant float  cfMouseSpeed = 0.01f;
-__constant float3 f3EyePos = (float3)(0, 0, 7.0);
-__constant int MAXITER = 1;
+//__constant float3 f3EyePos = (float3)(0, 0, 7.0);
+//__constant int MAXITER = 1;
 
 struct TriangleCandidateSplitPlane
 {
@@ -53,6 +53,26 @@ struct t
 	float tzMin;
 
 	
+};
+
+//SAA参数
+struct SAAParam 
+{
+	float originTmp;
+	float SAASingleSampleCount;
+	float descSpeed;
+};
+
+//PSO参数
+struct PSOParam
+{
+	float particleNum;
+	float PSOSampleCount;
+	float inertiaWeight;
+	float c1Weight;
+	float c2Weight;
+	float singleMaxShift;
+	int 	maxLength;
 };
 
 bool bCross(struct t stT, float* tMin, float* tMax)
@@ -310,30 +330,224 @@ __kernel void SAHSplit(__global const struct TriangleCandidateSplitPlane* input,
 	//printf("\n");
 }
 
-__kernel void PSOSAHSplit()
+__kernel void SAASAHSplit(__global const struct TriangleCandidateSplitPlane* input,
+						__global struct SplitNode*	splitNodeArray,
+						__global const int* splitNodeArrayBeg,
+						__global const int* splitNodeArrayEnd,
+						__global const int* randPos,
+						__global const int* randPro,
+						__global const int* maxSize,
+						__global const struct SAAParam* param
+						)
 {
+	int T0 = param->originTmp;
+	int NMAX = param->SAASingleSampleCount;
+	float DEC_SPEED = param->descSpeed;
+	
+	int idx= get_global_id(0) + (*splitNodeArrayBeg);
+	//printf("Beg:%d\t\tEnd:%d\t\tID:%d\t\t\nnodeBeg:%d\t\tnodeEnd:%d\t\t\n", *splitNodeArrayBeg, *splitNodeArrayEnd, idx, splitNodeArray[idx].beg, splitNodeArray[idx].end);
+	splitNodeArray[idx].xMax = input[splitNodeArray[idx].beg].xMax;
+	splitNodeArray[idx].xMin = input[splitNodeArray[idx].beg].xMin;
+	splitNodeArray[idx].yMax = input[splitNodeArray[idx].beg].yMax;
+	splitNodeArray[idx].yMin = input[splitNodeArray[idx].beg].yMin;
+	splitNodeArray[idx].zMax = input[splitNodeArray[idx].beg].zMax;
+	splitNodeArray[idx].zMin = input[splitNodeArray[idx].beg].zMin;
+	UpdateSplitNodeWithAABBInfo(splitNodeArray, idx, input);
+		
+	if((idx>= *splitNodeArrayBeg)&&(idx<= *splitNodeArrayEnd) && (splitNodeArray[idx].end - splitNodeArray[idx].beg > 64) && (splitNodeArray[idx].beg != -1) && (splitNodeArray[idx].end != -1))
+	{
+		
+		int i = 0;
+		int j = 0;
+		int currentPos = randPos[i++] % ((splitNodeArray[idx].end) - (splitNodeArray[idx].beg) + 1) + splitNodeArray[idx].beg;
+		float currentSAH = ComputeSAH(currentPos, splitNodeArray, idx, input);
+		
+		//printf("Beg:%d\t\tEnd:%d\t\tID:%d\t\t\nnodeBeg:%d\t\tnodeEnd:%d\t\t\n", *splitNodeArrayBeg, *splitNodeArrayEnd, globalID, splitNodeArray[globalID].beg, splitNodeArray[globalID].end);
+		//printf("before:\nrandPos:%d\t\tcurrentPos:%d\t\tcurrentSAH:%f\n",randPos[i-1], currentPos, currentSAH);
+		int T = T0;
+		int maxNum = 0;
+		maxNum = (splitNodeArray[idx].end - splitNodeArray[idx].beg + 1) * log(1 - DEC_SPEED)/ log( 20.0 ) ;
+		maxNum /= 3;
+		while(T > 1)
+		{
+			int n = 0;
+			while(n < maxNum)
+			{
+				int newPos = randPos[i++] % ((splitNodeArray[idx].end) - (splitNodeArray[idx].beg) + 1) + splitNodeArray[idx].beg;
+				float newSAH = ComputeSAH(newPos, splitNodeArray, idx, input);
 
+				if(newSAH < currentSAH)
+				{
+					currentPos = newPos;
+					currentSAH = newSAH;
+				}
+				else
+				{
+					float r = exp(-(newSAH - currentSAH) / T);
+					if(randPro[j++] < r)
+					{
+						currentPos = newPos;
+						currentSAH = newSAH;
+					}
+				}//endif(newSAH < currentSAH)
+				n++;
+			}//end while(n<8)
+			T = (1-DEC_SPEED)*T;
+		}//end while(T > 1)
+
+		//printf("after:\nrandPos:%d\t\tcurrentPos:%d\t\tcurrentSAH:%f\n",randPos[i-1], currentPos, currentSAH);
+
+		//printf("%d", currentPos);
+
+		splitNodeArray[idx*2 + 1].beg = splitNodeArray[idx].beg;
+		splitNodeArray[idx*2 + 1].end = currentPos - 1;
+		splitNodeArray[idx*2 + 2].beg = currentPos;
+		splitNodeArray[idx*2 + 2].end = splitNodeArray[idx].end;
+		if((idx*2 + 2) < *maxSize)
+		{
+			splitNodeArray[idx].leftChild = idx*2 + 1;
+			splitNodeArray[idx].rightChild = idx*2 + 2;
+		}
+		
+	}
+	//printf("\n");
 }
 
-__kernel void SAASAHSplit()
+__kernel void PSOSAHSplit(__global struct TriangleCandidateSplitPlane* input,
+						__global struct SplitNode*	splitNodeArray,
+						__global const int* splitNodeArrayBeg,
+						__global const int* splitNodeArrayEnd,
+						__global const int* randPos,
+						__global const int* randPro,
+						__global const int* maxSize,
+						__global const struct PSOParam* param,
+					  __local	int* adX,
+						__local float* adY,
+						__local float* adV,
+						__local float* adBest
+						)
 {
+	int ciParticleNum = param->particleNum;
+	int ciMax = param->PSOSampleCount;
+	float dC1 = param->c1Weight;
+	float dC2 = param->c2Weight;
+	float cdVmax = param->singleMaxShift;
+	float dW = param->inertiaWeight;
+	int len = param->maxLength;
+	
+	int idx= get_global_id(0) + (*splitNodeArrayBeg);
+	
+	//printf("Beg:%d\t\tEnd:%d\t\tID:%d\t\t\nnodeBeg:%d\t\tnodeEnd:%d\t\t\n", *splitNodeArrayBeg, *splitNodeArrayEnd, idx, splitNodeArray[idx].beg, splitNodeArray[idx].end);
+	splitNodeArray[idx].xMax = input[splitNodeArray[idx].beg].xMax;
+	splitNodeArray[idx].xMin = input[splitNodeArray[idx].beg].xMin;
+	splitNodeArray[idx].yMax = input[splitNodeArray[idx].beg].yMax;
+	splitNodeArray[idx].yMin = input[splitNodeArray[idx].beg].yMin;
+	splitNodeArray[idx].zMax = input[splitNodeArray[idx].beg].zMax;
+	splitNodeArray[idx].zMin = input[splitNodeArray[idx].beg].zMin;
+	UpdateSplitNodeWithAABBInfo(splitNodeArray, idx, input);
+	if((idx>= *splitNodeArrayBeg)&&(idx<= *splitNodeArrayEnd) && (splitNodeArray[idx].end - splitNodeArray[idx].beg > 64) && (splitNodeArray[idx].beg != -1) && (splitNodeArray[idx].end != -1))
+	{
+		
+		
+		int iPos = 0;
+		int jPos = 0;
+		int currentPos = randPos[iPos++] % ((splitNodeArray[idx].end) - (splitNodeArray[idx].beg) + 1) + splitNodeArray[idx].beg;
+		float currentSAH = ComputeSAH(currentPos, splitNodeArray, idx, input);
+		
+		
+		//粒子群算法
+		/*int* adX;
+		float* adY;
+		float* adV;
+		float* adBest;
+		
+		adX = (int*)local_malloc(ciParticleNum*sizeof(int));
+		adY = (float*)local_malloc(ciParticleNum*sizeof(float));
+		adV = (float*)local_malloc(ciParticleNum*sizeof(float));
+		adBest = (float*)local_malloc(ciParticleNum*sizeof(float));*/
+		//初始化
+		/*for( int i = 0; i<ciParticleNum; i++ )
+		{
+			if( iPos >= len ) iPos %= len;
+			
+			adX[i] = randPos[iPos++] % ((splitNodeArray[idx].end) - (splitNodeArray[idx].beg) + 1) + splitNodeArray[idx].beg;
+			adY[i] = ComputeSAH(adX[i], splitNodeArray, idx, input);
+			adBest[i] = adY[i];
+			if( adY[i] < currentSAH ) 
+			{
+				currentSAH = adY[i];
+				currentPos = adX[i];
+			}
+		}		
 
+		int maxLayer = (splitNodeArray[idx].end - splitNodeArray[idx].beg+1)/ciParticleNum;
+		maxLayer /= 6;
+		//for( int i = 0 ; i<ciMax; i++)
+		for( int i = 0; i<maxLayer; i++)
+		{
+			for( int j = 0; j<ciParticleNum; j++)
+			{
+				if( iPos >= len ) iPos %= len;
+				adV[j] = dW*adV[j] + dC1*randPro[iPos++]*(adBest[j] - adX[j] ) + dC2*randPro[iPos]*(adBest[j]-adX[j]);
+
+				if( adV[j] > cdVmax ) adV[j] = cdVmax;
+				if( adV[j] < -cdVmax) adV[j] = -cdVmax;
+				adX[j] += adV[j];
+				if( adX[j] > *splitNodeArrayEnd) adX[j] = *splitNodeArrayEnd;
+				if( adX[j] < *splitNodeArrayBeg) adX[j] = *splitNodeArrayBeg;
+
+				adY[i] = ComputeSAH(adX[i], splitNodeArray, idx, input);
+				adBest[i] = (adY[i]<adBest[i]) ? adY[i] : adBest[i];
+				if( adBest[i] != adY[i] ) adX[j] -= adV[j];
+
+
+			}
+
+			for( int i = 0; i<ciParticleNum; i++ )
+			{
+				
+				if( adBest[i] < currentSAH ) 
+				{
+					currentSAH = adBest[i];
+					currentPos = adX[i];
+				}	
+
+			}	
+		}
+
+			
+
+
+		splitNodeArray[idx*2 + 1].beg = splitNodeArray[idx].beg;
+		splitNodeArray[idx*2 + 1].end = currentPos - 1;
+		splitNodeArray[idx*2 + 2].beg = currentPos;
+		splitNodeArray[idx*2 + 2].end = splitNodeArray[idx].end;
+
+		if((idx*2 + 2) < *maxSize)
+		{
+			splitNodeArray[idx].leftChild = idx*2 + 1;
+			splitNodeArray[idx].rightChild = idx*2 + 2;
+		}
+		*/
+	}
+	//printf("\n");
 }
-
-/*__kernel void RayTrace(__global struct SplitNode* nodeArray, __global int* width, __global int* height, __global unsigned char* pRes, __global struct TriangleInfo* tinfo, __global struct TriangleCandidateSplitPlane* tcsArray, __global int* len)
-{
-	int idxX = get_global_id(0);
-	int idxY = get_global_id(1);
-	pRes[(idxY*768+idxX)*4] = 0;
-	pRes[(idxY*768+idxX)*4+1] = 255;
-	pRes[(idxY*768+idxX)*4+2] = 0;
-	pRes[(idxY*768+idxX)*4+3] = 255;
-}*/
-
 
 
 //遍历叶子节点的三角面片
-uchar3 RayCrossTraingleTest(struct SplitNode node, float3 f3EyePos, float3 f3LightDir, float* fDst,__global  struct TriangleInfo* TriangleInfoArray, __global struct TriangleCandidateSplitPlane* input, float* tMin, float* tMax, float3* f3NextPos, float3* f3NextDir, float* cosAl, int* flag)
+uchar3 RayCrossTraingleTest(struct SplitNode node, 
+														float3 f3EyePos,
+														float3 cf3LightPos, 
+														float3 f3LightDir, 
+														float* fDst,
+														__global  struct TriangleInfo* TriangleInfoArray, 
+														__global struct TriangleCandidateSplitPlane* input, 
+														float* tMin, 
+														float* tMax, 
+														float3* f3NextPos, 
+														float3* f3NextDir, 
+														float* cosAl, 
+														int* flag)
 {
 	float3 f3Res = (float3)(153, 51, 250);
 	uchar3 uc3Res = (uchar3)(153, 51, 250);
@@ -455,7 +669,7 @@ bool IsEmpty(struct Stack* sSt)
 }
 
 
-uchar3 RayCrossAABBTest(struct SplitNode root, float3 f3EyePos, float3 f3LightDir,__global const struct SplitNode* spSplitNodeArray, __global struct TriangleInfo* TriangleInfoArray, __global struct TriangleCandidateSplitPlane* input, float* tMin, float* tMax, __global const int* length, float3* f3NextPos, float3* f3NextDir, float* cosAlpha, int* flag)
+uchar3 RayCrossAABBTest(struct SplitNode root, float3 f3EyePos, float3 cf3LightPos, float3 f3LightDir,__global const struct SplitNode* spSplitNodeArray, __global struct TriangleInfo* TriangleInfoArray, __global struct TriangleCandidateSplitPlane* input, float* tMin, float* tMax, __global const int* length, float3* f3NextPos, float3* f3NextDir, float* cosAlpha, int* flag)
 {
 	
 	//背景颜色
@@ -641,7 +855,7 @@ uchar3 RayCrossAABBTest(struct SplitNode root, float3 f3EyePos, float3 f3LightDi
 
 		if( ( snCurNode.leftChild == -1 ) && ( snCurNode.rightChild == -1 ))
 		{
-			uchar3 uc3Tmp = RayCrossTraingleTest( snCurNode, f3EyePos, f3LightDir, &fDst, TriangleInfoArray, input, tMin, tMax, f3NextPos, f3NextDir, cosAlpha, flag);
+			uchar3 uc3Tmp = RayCrossTraingleTest( snCurNode, f3EyePos, cf3LightPos ,f3LightDir, &fDst, TriangleInfoArray, input, tMin, tMax, f3NextPos, f3NextDir, cosAlpha, flag);
 			if( fDst < fLastDst)
 			{
 				f3Res = uc3Tmp;
@@ -661,7 +875,10 @@ __kernel void RayTrace(__global const struct SplitNode* spSplitNodeArray,
 											__global const struct TriangleInfo* TriangleInfoArray, 
 											__global const struct TriangleCandidateSplitPlane* input, 
 											__global const int*  length,
-											__global const double* xPos, 
+											__global const float* eyePos, 
+											__global const float* lightPos,
+											__global const int* iter,
+											__global const double* xPos,
 											__global const double* yPos
 											)
 {
@@ -670,6 +887,8 @@ __kernel void RayTrace(__global const struct SplitNode* spSplitNodeArray,
 	float tMin = 0;
 	float tMax = 0;
 	
+	float3 f3EyePos = (float3)(eyePos[0], eyePos[1], eyePos[2]);
+	float3 cf3LightPos = (float3)(lightPos[0], lightPos[1], lightPos[2]);
 	
 	int idx = get_global_id(0);
 	
@@ -687,7 +906,6 @@ __kernel void RayTrace(__global const struct SplitNode* spSplitNodeArray,
 	float cosBeta = 1 / sqrt(pown(tanBeta, 2) + 1);
 	
 	
-
 
 	float4 f4PixPos = (float4)(f3PixPos, 1);
 	
@@ -722,7 +940,7 @@ __kernel void RayTrace(__global const struct SplitNode* spSplitNodeArray,
 
 	uchar3 f3Res = (uchar3)(8, 46, 84);
 	int flag = 0;
-	for(int i = 0; i<MAXITER; i++)
+	for(int i = 0; i< (*iter); i++)
 	{
 		
 		if(isnan(f3LightDir.x) && i == 0)
@@ -735,7 +953,7 @@ __kernel void RayTrace(__global const struct SplitNode* spSplitNodeArray,
 		uchar3 uc3TmpColor;
 		float cosAlpha;
 		
-		uc3TmpColor = RayCrossAABBTest(spSplitNodeArray[0], f3Pos, f3LightDir, spSplitNodeArray, TriangleInfoArray, input, &tMin, &tMax, length, &f3NextPos, &f3NextDir, &cosAlpha, &flag);
+		uc3TmpColor = RayCrossAABBTest(spSplitNodeArray[0], f3Pos, cf3LightPos, f3LightDir, spSplitNodeArray, TriangleInfoArray, input, &tMin, &tMax, length, &f3NextPos, &f3NextDir, &cosAlpha, &flag);
 		
 		if( 0 == flag)	break;//表示没有找到相交的三角面片
 		if( 0 == i)

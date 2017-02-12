@@ -19,12 +19,12 @@ Selected Device:			GeForce 940MX
 模型数据读取完成！
 
 
-使用常规SAH划分方法！
+使用粒子群方法进行SAH划分！
 
 渲染参数设置：
 	--光线迭代次数：	1
-	--视点位置：	(1,1,1)
-	--光源位置：	(1,1,1)
+	--视点位置：	(0,0,7)
+	--光源位置：	(7,0,0)
 
 
 参数设置完毕！
@@ -64,72 +64,70 @@ clEnqueueNDRangeKernel of BitonicSort--成功！
 
 create buffer of MaxSize--成功！
 
-create buffer of CommSplitNodeArrayMem--成功！
+clCreateBuffer of SplitNodeArray--成功！
 
 create buffer of SplitNodeArrayBegMem--成功！
 
 create buffer of SplitNodeArrayEndMem--成功！
 
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+EnqueueNDRangeKernel of SAHSplit_NONCOMMON--成功！
 
 create buffer of SplitNodeArrayBegMem--成功！
 
 create buffer of SplitNodeArrayEndMem--成功！
 
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+EnqueueNDRangeKernel of SAHSplit_NONCOMMON--成功！
 
 create buffer of SplitNodeArrayBegMem--成功！
 
 create buffer of SplitNodeArrayEndMem--成功！
 
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+EnqueueNDRangeKernel of SAHSplit_NONCOMMON--成功！
 
 create buffer of SplitNodeArrayBegMem--成功！
 
 create buffer of SplitNodeArrayEndMem--成功！
 
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+EnqueueNDRangeKernel of SAHSplit_NONCOMMON--成功！
 
 create buffer of SplitNodeArrayBegMem--成功！
 
 create buffer of SplitNodeArrayEndMem--成功！
 
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+EnqueueNDRangeKernel of SAHSplit_NONCOMMON--成功！
 
 create buffer of SplitNodeArrayBegMem--成功！
 
 create buffer of SplitNodeArrayEndMem--成功！
 
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+EnqueueNDRangeKernel of SAHSplit_NONCOMMON--成功！
 
 create buffer of SplitNodeArrayBegMem--成功！
 
 create buffer of SplitNodeArrayEndMem--成功！
 
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+EnqueueNDRangeKernel of SAHSplit_NONCOMMON--成功！
 
 create buffer of SplitNodeArrayBegMem--成功！
 
 create buffer of SplitNodeArrayEndMem--成功！
 
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+EnqueueNDRangeKernel of SAHSplit_NONCOMMON--成功！
 
 create buffer of SplitNodeArrayBegMem--成功！
 
 create buffer of SplitNodeArrayEndMem--成功！
 
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
+EnqueueNDRangeKernel of SAHSplit_NONCOMMON--成功！
 
 create buffer of SplitNodeArrayBegMem--成功！
 
 create buffer of SplitNodeArrayEndMem--成功！
 
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
-
-read buffer of inputInfoMem--成功！
+EnqueueNDRangeKernel of SAHSplit_NONCOMMON--成功！
 
 
-构建KD-Tree完成！	--花费时间:265(ms)
+构建KD-Tree完成！	--花费时间:281(ms)
 
 
 clCreateBuffer of cmWinWidthMem--成功！
@@ -145,7 +143,7 @@ clCreateFromGLBuffer of PBOMem--成功！
 释放CL环境下的PBO控制权--成功！
 
 
-渲染成功！	--花费时间为: 266(ms)
+渲染成功！	--花费时间为: 250(ms)
 
 
 

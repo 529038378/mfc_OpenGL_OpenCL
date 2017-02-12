@@ -2,6 +2,7 @@
 
 #include "cusLib.h"
 #include "PrallalCompute.h"
+#include "afxwin.h"
 // CSAAParamDlg ¶Ô»°¿ò
 
 class CSAAParamDlg : public CDialogEx
@@ -20,11 +21,15 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	CString GetEdtContent(int idc, wchar_t* errInfo);
+	CString GetEdtContent(CEdit* edt, wchar_t* errInfo);
 	void	SetOpenCLComPtr(COpenCLCompute* ptr);
 
 private:
 	COpenCLCompute* m_OpenCLCom;
 public:
 	afx_msg void OnBnClickedSaaenterButton();
+	CEdit m_OriginTmpEdt;
+	CEdit m_ThresholdTmpEdt;
+	CEdit m_SingleSampleCount;
+	CEdit m_DecSpeed;
 };

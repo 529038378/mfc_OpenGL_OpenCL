@@ -11,6 +11,7 @@ COpenCLCompute::COpenCLCompute()
 	m_HardwareInfo = new HardwareInfo;
 	m_GLCLShared = false;
 	m_ConfigInfo = new ConfigInfo;
+	m_ModleInfo = new ModelInfo;
 	m_GLCLShared = true;
 	m_ConfigInfo->viewPos.resize(3);
 	m_ConfigInfo->lightPos.resize(3);
@@ -200,7 +201,7 @@ BOOL COpenCLCompute::InitContext()
 	//编译kernel程序
 	m_Program = clCreateProgramWithSource(m_Context, 1,	&ccSource, &stFileLen, &iStatus);
 	ASSERT(iStatus == CL_SUCCESS);
-	const char ccOptions[] ="-cl-std=CL1.2 ";//-DT0  -DNMAX -DDEC_SPEED -DMAXITER -w ";
+	const char ccOptions[] ="-cl-std=CL2.0 ";//-DT0  -DNMAX -DDEC_SPEED -DMAXITER -w ";
 	iStatus = clBuildProgram(m_Program, 1, &m_HardwareInfo->platformInfo[m_ConfigInfo->selPlaformIndex].deviceIDs[m_ConfigInfo->selDeviceIndex], ccOptions, 0, 0);
 	if ( CL_SUCCESS != iStatus )
 	{
@@ -513,14 +514,59 @@ std::vector<int> randArray(maxLayerLenght);
 		cl_mem randArrayMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int)*maxLayerLenght, &randArray[0], &iStatus);
 		clSetKernelArg(m_SAHSplitKernel, 4, sizeof(cl_mem), &randArrayMem);
 
-		std::vector<float> randPro((m_ConfigInfo->originTmp)*(m_ConfigInfo->PSOSampleCount));
-		for (int i = 0; i < randPro.size(); i++)
-		{
-			randPro[i] = (rand()%10)/10.0;
-		}
+		
+		
+		iStatus = clSetKernelArg(m_SAHSplitKernel, 6, sizeof(cl_mem), &maxSizeMem);
 
-		cl_mem randProMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(float)*randPro.size(), &randPro[0], &iStatus);
-		clSetKernelArg(m_SAHSplitKernel, 5, sizeof(cl_mem), &randProMem);
+		if (SAHSPLIT_SAA == m_ConfigInfo->SAHType)
+		{
+			std::vector<float> randPro((m_ConfigInfo->originTmp)*(m_ConfigInfo->SAASingleSampleCount));
+			for (int i = 0; i < randPro.size(); i++)
+			{
+				randPro[i] = (rand()%10)/10.0;
+			}
+
+			m_randProMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(float)*randPro.size(), &randPro[0], &iStatus);
+			clSetKernelArg(m_SAHSplitKernel, 5, sizeof(cl_mem), &m_randProMem);
+
+			m_SAAParam.originTmp = m_ConfigInfo->originTmp;
+			m_SAAParam.descSpeed = m_ConfigInfo->descSpeed;
+			m_SAAParam.SAASingleSampleCount = m_ConfigInfo->SAASingleSampleCount;
+
+			m_ParamMem = clCreateBuffer(m_Context,CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(m_SAAParam), &m_SAAParam, &iStatus);
+			clSetKernelArg(m_SAHSplitKernel, 7, sizeof(cl_mem), &m_ParamMem);
+		}
+		else if (SAHSPLIT_PSO == m_ConfigInfo->SAHType)
+		{
+			std::vector<float> randPro((m_ConfigInfo->particleNum)*(m_ConfigInfo->PSOSampleCount));
+			for (int i = 0; i < randPro.size(); i++)
+			{
+				randPro[i] = (rand()%10)/10.0;
+			}
+
+			m_randProMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(float)*randPro.size(), &randPro[0], &iStatus);
+			clSetKernelArg(m_SAHSplitKernel, 5, sizeof(cl_mem), &m_randProMem);
+
+			m_PSOParam.c1Weight = m_ConfigInfo->c1Weight;
+			m_PSOParam.c2Weight = m_ConfigInfo->c2Weight;
+			m_PSOParam.inertiaWeight = m_ConfigInfo->inertiaWeight;
+			m_PSOParam.particleNum = m_ConfigInfo->particleNum;
+			m_PSOParam.PSOSampleCount = m_ConfigInfo->PSOSampleCount;
+			m_PSOParam.singleMaxShift = m_ConfigInfo->singleMaxShift;
+			m_PSOParam.maxLength = randPro.size();
+
+			m_ParamMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(m_PSOParam), &m_PSOParam, &iStatus);
+			clSetKernelArg(m_SAHSplitKernel, 7, sizeof(cl_mem), &m_ParamMem);
+
+			m_adXMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_WRITE, m_ConfigInfo->particleNum*sizeof(int), NULL, &iStatus);
+			m_adYMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_WRITE, m_ConfigInfo->particleNum*sizeof(float), NULL, &iStatus);
+			m_adVMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_WRITE, m_ConfigInfo->particleNum*sizeof(float), NULL, &iStatus);
+			m_adBest = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_WRITE, m_ConfigInfo->particleNum*sizeof(float), NULL, &iStatus);
+			clSetKernelArg(m_SAHSplitKernel, 8, sizeof(cl_mem), &m_adXMem);
+			clSetKernelArg(m_SAHSplitKernel, 9, sizeof(cl_mem), &m_adYMem);
+			clSetKernelArg(m_SAHSplitKernel, 10, sizeof(cl_mem), &m_adVMem);
+			clSetKernelArg(m_SAHSplitKernel, 11, sizeof(cl_mem), &m_adBest);
+		}
 
 		int depth = 0;
 		for (int i= 1; (i < log((float) maxSplitNodeArrayLength)/log(2.0)) && (depth < m_ConfigInfo->maxKDTreeDepth); i++)
@@ -529,7 +575,7 @@ std::vector<int> randArray(maxLayerLenght);
 			int splitNodeArrayEnd = pow(2.0, i) - 2;
 			size_t layerLength = splitNodeArrayEnd - splitNodeArrayBeg + 1;
 			const size_t globalSize = layerLength;
-			const size_t localSize = 64;
+			const size_t localSize = (globalSize <= 64)? globalSize : 64;
 			cl_mem splitNodeArrayBegMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), &splitNodeArrayBeg, &iStatus);
 			CheckError(iStatus, _T("create buffer of SplitNodeArrayBegMem"));
 			cl_mem splitNodeArrayEndMem = clCreateBuffer(m_Context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int), &splitNodeArrayEnd, &iStatus);
@@ -544,7 +590,7 @@ std::vector<int> randArray(maxLayerLenght);
 			depth++;
 		}
 		clFinish(m_Queue);
-		clReleaseMemObject(randProMem);
+		//clReleaseMemObject(randProMem);
 		clReleaseMemObject(randArrayMem);
 	}
 
@@ -584,13 +630,21 @@ BOOL COpenCLCompute::CalPBO()
 		cl_int cliLength = GetNodeArrayMaxLength(m_InputInfo.size());
 		cl_mem lengthMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_int), &cliLength, &iStatus);
 		iStatus = clSetKernelArg(m_RayTraceKernel, 6, sizeof(cl_mem), &lengthMem);
+		
+		cl_mem eyePosMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(m_ConfigInfo->viewPos), &m_ConfigInfo->viewPos[0], &iStatus);
+		cl_mem lightPosMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(m_ConfigInfo->lightPos), &m_ConfigInfo->lightPos[0], &iStatus);
+		iStatus = clSetKernelArg(m_RayTraceKernel, 7, sizeof(cl_mem), &eyePosMem);
+		iStatus = clSetKernelArg(m_RayTraceKernel, 8, sizeof(cl_mem), &lightPosMem);
+
+		cl_mem iterMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int), &m_ConfigInfo->reflectCount, &iStatus);
+		iStatus = clSetKernelArg(m_RayTraceKernel, 9, sizeof(cl_mem), &iterMem);
 
 		int posX = ciRenderWinWidth/2;
 		int posY = ciRenderWinHeight/2;
 		cl_mem posXMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int), &posX, &iStatus);
 		cl_mem posYMem = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int), &posY, &iStatus);
-		iStatus = clSetKernelArg(m_RayTraceKernel, 7, sizeof(cl_mem), &posXMem);
-		iStatus = clSetKernelArg(m_RayTraceKernel, 8, sizeof(cl_mem), &posYMem);
+		iStatus = clSetKernelArg(m_RayTraceKernel, 10, sizeof(cl_mem), &posXMem);
+		iStatus = clSetKernelArg(m_RayTraceKernel, 11, sizeof(cl_mem), &posYMem);
 
 		glFinish();
 		iStatus = clEnqueueAcquireGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
@@ -602,12 +656,12 @@ BOOL COpenCLCompute::CalPBO()
 		CheckError(iStatus, _T("释放CL环境下的PBO控制权"));
 		clFinish(m_Queue);
 
-		//clReleaseMemObject(cmWinWidthMem);
-		//clReleaseMemObject(cmWinHeightMem);
+		clReleaseMemObject(cmWinWidthMem);
+		clReleaseMemObject(cmWinHeightMem);
 		//clReleaseMemObject(m_PBOMem);
-		//clReleaseMemObject(clmTriangleInfoMem);
-		//clReleaseMemObject(m_InputInfoMem);
-		//clReleaseMemObject(lengthMem);
+		clReleaseMemObject(clmTriangleInfoMem);
+		clReleaseMemObject(m_InputInfoMem);
+		clReleaseMemObject(lengthMem);
 		
 		/*m_PBOMem = clCreateFromGLBuffer(m_Context, CL_MEM_WRITE_ONLY, m_PBO, &iStatus);
 		CheckError(iStatus, _T("clCreateFromBuffer of PBOMem "));
@@ -688,7 +742,7 @@ BOOL COpenCLCompute::SetPSOSAHParam(int particleNum, int sampleCount, float iner
 		CheckError(!CL_SUCCESS, _T("PSO_SAH参数设置"));
 		return FALSE;
 	}
-	m_ConfigInfo->SAHType = SAHSPLIT_SAA;
+	m_ConfigInfo->SAHType = SAHSPLIT_PSO;
 	m_ConfigInfo->particleNum = particleNum;
 	m_ConfigInfo->PSOSampleCount = sampleCount;
 	m_ConfigInfo->inertiaWeight = inertiaWeight;

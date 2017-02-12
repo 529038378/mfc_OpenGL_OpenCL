@@ -57,7 +57,7 @@ BOOL CRenderDlg::OnInitDialog()
 	m_Render->Create(NULL, NULL, WS_CHILDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE, dlgRect, this, 0);
 
 	static int flag = 1;
-	if (flag--) CDialogEx::OnOK();
+	//if (flag--) CDialogEx::OnOK();
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }

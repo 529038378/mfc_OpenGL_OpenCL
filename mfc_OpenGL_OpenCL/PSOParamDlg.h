@@ -2,6 +2,7 @@
 
 #include "cusLib.h"
 #include "PrallalCompute.h"
+#include "afxwin.h"
 
 // CPSOParamDlg ¶Ô»°¿ò
 
@@ -22,10 +23,16 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	CString GetEdtContent(int idc, wchar_t* errInfo);
+	CString GetEdtContent(CEdit* edt, wchar_t* errInfo);
 	void SetOpenCLComPtr(COpenCLCompute* ptr);
 private:
 	COpenCLCompute* m_OpenCLCom;
 public:
 	afx_msg void OnBnClickedOk();
+	CEdit m_ParticlNumEdt;
+	CEdit m_SampleCountEdt;
+	CEdit m_IertiaWeightEdt;
+	CEdit m_C1WeightEdt;
+	CEdit m_C2WeigthEdt;
+	CEdit m_SingleMaxShiftEdt;
 };

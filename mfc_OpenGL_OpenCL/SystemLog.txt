@@ -59,7 +59,7 @@ clCreateBuffer of dirMem--成功！
 clEnqueueNDRangeKernel of BitonicSort--成功！
 
 
-排序完成！	--花费时间:46(ms)
+排序完成！	--花费时间:31(ms)
 
 
 create buffer of MaxSize--成功！
@@ -126,10 +126,428 @@ create buffer of SplitNodeArrayEndMem--成功！
 
 clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
 
-read buffer of inputInfoMem--成功！
+
+构建KD-Tree完成！	--花费时间:250(ms)
 
 
-构建KD-Tree完成！	--花费时间:266(ms)
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 281(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 219(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 172(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 218(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 187(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 204(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 234(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 204(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 203(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 203(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 219(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 219(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 219(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 219(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 219(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 234(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 234(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 250(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 250(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 265(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 250(ms)
+
+
+
+实时渲染成功！
 
 
 clCreateBuffer of cmWinWidthMem--成功！
@@ -149,7 +567,307 @@ clCreateFromGLBuffer of PBOMem--成功！
 
 
 
-离线渲染成功！
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 265(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 266(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 265(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 266(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 266(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 266(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 282(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 281(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 281(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 297(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 296(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 297(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 313(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 313(ms)
+
+
+
+实时渲染成功！
+
+
+clCreateBuffer of cmWinWidthMem--成功！
+
+clCreateBuffer of cmWinHeightMem--成功！
+
+clCreateFromGLBuffer of PBOMem--成功！
+
+获取GL环境下的PBO控制权--成功！
+
+计算PBO--成功！
+
+释放CL环境下的PBO控制权--成功！
+
+
+渲染成功！	--花费时间为: 313(ms)
+
+
+
+实时渲染成功！
 
 
 建立OpenGL-OpenCL共享context--成功！
@@ -181,7 +899,7 @@ clCreateBuffer of dirMem--成功！
 clEnqueueNDRangeKernel of BitonicSort--成功！
 
 
-排序完成！	--花费时间:47(ms)
+排序完成！	--花费时间:94(ms)
 
 
 create buffer of MaxSize--成功！
@@ -248,10 +966,8 @@ create buffer of SplitNodeArrayEndMem--成功！
 
 clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
 
-read buffer of inputInfoMem--成功！
 
-
-构建KD-Tree完成！	--花费时间:360(ms)
+构建KD-Tree完成！	--花费时间:719(ms)
 
 
 clCreateBuffer of cmWinWidthMem--成功！
@@ -267,7 +983,7 @@ clCreateFromGLBuffer of PBOMem--成功！
 释放CL环境下的PBO控制权--成功！
 
 
-渲染成功！	--花费时间为: 406(ms)
+渲染成功！	--花费时间为: 484(ms)
 
 
 
@@ -286,94 +1002,4 @@ clCreateFromGLBuffer of PBOMem--成功！
 clCreateBuffer of InputInfoMem--成功！
 
 clCreateBuffer of dirMem--成功！
-
-create buffer of MaxSize--成功！
-
-create buffer of CommSplitNodeArrayMem--成功！
-
-create buffer of SplitNodeArrayBegMem--成功！
-
-create buffer of SplitNodeArrayEndMem--成功！
-
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
-
-create buffer of SplitNodeArrayBegMem--成功！
-
-create buffer of SplitNodeArrayEndMem--成功！
-
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
-
-create buffer of SplitNodeArrayBegMem--成功！
-
-create buffer of SplitNodeArrayEndMem--成功！
-
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
-
-create buffer of SplitNodeArrayBegMem--成功！
-
-create buffer of SplitNodeArrayEndMem--成功！
-
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
-
-create buffer of SplitNodeArrayBegMem--成功！
-
-create buffer of SplitNodeArrayEndMem--成功！
-
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
-
-create buffer of SplitNodeArrayBegMem--成功！
-
-create buffer of SplitNodeArrayEndMem--成功！
-
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
-
-create buffer of SplitNodeArrayBegMem--成功！
-
-create buffer of SplitNodeArrayEndMem--成功！
-
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
-
-create buffer of SplitNodeArrayBegMem--成功！
-
-create buffer of SplitNodeArrayEndMem--成功！
-
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
-
-create buffer of SplitNodeArrayBegMem--成功！
-
-create buffer of SplitNodeArrayEndMem--成功！
-
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
-
-create buffer of SplitNodeArrayBegMem--成功！
-
-create buffer of SplitNodeArrayEndMem--成功！
-
-clEnqueueNDRangeKernel of SAHSplitKernel_Common--成功！
-
-Error:	read buffer of inputInfoMem--失败！！！
-
-
-构建KD-Tree完成！	--花费时间:422(ms)
-
-
-clCreateBuffer of cmWinWidthMem--成功！
-
-clCreateBuffer of cmWinHeightMem--成功！
-
-clCreateFromGLBuffer of PBOMem--成功！
-
-获取GL环境下的PBO控制权--成功！
-
-Error:	计算PBO--失败！！！
-
-释放CL环境下的PBO控制权--成功！
-
-
-渲染成功！	--花费时间为: 94(ms)
-
-
-
-离线渲染成功！
-
 

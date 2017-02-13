@@ -631,16 +631,16 @@ BOOL COpenCLCompute::CalPBO()
 	CheckError(iStatus, _T("获取GL环境下的PBO控制权"));
 	iStatus = clEnqueueNDRangeKernel(m_Queue, m_RayTraceKernel, 2, NULL, &pixelGlobalGroup[0], &pixelLocalGroup[0], 0, NULL, NULL);
 	CheckError(iStatus, _T("计算PBO"));
-	clFinish(m_Queue);
+	iStatus = clFinish(m_Queue);
 	iStatus = clEnqueueReleaseGLObjects(m_Queue, 1, &m_PBOMem, 0, NULL, NULL);
 	CheckError(iStatus, _T("释放CL环境下的PBO控制权"));
-	clFinish(m_Queue);
+	iStatus = clFinish(m_Queue);
 
 	clReleaseMemObject(cmWinWidthMem);
 	clReleaseMemObject(cmWinHeightMem);
 	//clReleaseMemObject(m_PBOMem);
 	clReleaseMemObject(clmTriangleInfoMem);
-	clReleaseMemObject(m_InputInfoMem);
+	//clReleaseMemObject(m_InputInfoMem);
 	clReleaseMemObject(lengthMem);
 
 	DWORD calEnd = GetTickCount();
